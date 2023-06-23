@@ -14,15 +14,6 @@ class DashboardAdapter(context: Context, items: List<MenuItem>) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     private var items: List<MenuItem> = ArrayList()
     private val ctx: Context
-//    private var mOnItemClickListener: OnItemClickListener? = null
-
-//    interface OnItemClickListener {
-//        fun onItemClick(view: View?, obj: ShopCategory?, position: Int)
-//    }
-//
-//    fun setOnItemClickListener(mItemClickListener: OnItemClickListener?) {
-//        mOnItemClickListener = mItemClickListener
-//    }
 
     init {
         this.items = items
@@ -55,11 +46,9 @@ class DashboardAdapter(context: Context, items: List<MenuItem>) :
             val item: MenuItem = items[position]
             holder.title.text = item.menuText
             holder.image.setImageDrawable(holder.image.context.resources.getDrawable(item.iconResId))
-//            view.tileLayout.setOnClickListener { view ->
-//                if (mOnItemClickListener != null) {
-//                    mOnItemClickListener!!.onItemClick(view, items[position], position)
-//                }
-//            }
+            holder.tileLayout.setOnClickListener {
+                item.itemClickListener.invoke()
+            }
         }
     }
 

@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import com.mobileassistant.smartvision.R
 import com.mobileassistant.smartvision.databinding.FragmentHomeBinding
@@ -40,15 +41,28 @@ class HomeFragment : Fragment() {
         with(binding.recyclerView) {
             layoutManager = GridLayoutManager(context, NO_OF_COLUMNS)
             val items: List<MenuItem> = listOf(
-                MenuItem(getString(R.string.menu_item_1), R.drawable.reading_mode),
-                MenuItem(getString(R.string.menu_item_2), R.drawable.smart_cap),
-                MenuItem(getString(R.string.menu_item_3), R.drawable.face_recognition),
-                MenuItem(getString(R.string.menu_item_4), R.drawable.barcode_code_scanner)
+                MenuItem(
+                    getString(R.string.menu_item_1),
+                    R.drawable.reading_mode,
+                    ::navigateToReadingMode
+                ), MenuItem(
+                    getString(R.string.menu_item_2), R.drawable.smart_cap, ::navigateToReadingMode
+                ), MenuItem(
+                    getString(R.string.menu_item_3),
+                    R.drawable.face_recognition,
+                    ::navigateToReadingMode
+                ), MenuItem(
+                    getString(R.string.menu_item_4),
+                    R.drawable.barcode_code_scanner,
+                    ::navigateToReadingMode
+                )
             )
             val adapter = DashboardAdapter(context, items)
             setAdapter(adapter)
         }
     }
+
+    private fun navigateToReadingMode() = findNavController().navigate(R.id.nav_reading_mode)
 
     override fun onDestroyView() {
         super.onDestroyView()

@@ -34,7 +34,7 @@ class TextRecognitionProcessor(
 ) : VisionProcessorBase<Text>(context) {
   private val textRecognizer: TextRecognizer = TextRecognition.getClient(textRecognizerOptions)
   private val shouldGroupRecognizedTextInBlocks: Boolean = true
-  private val showLanguageTag: Boolean = true
+  private val showLanguageTag: Boolean = false
   private val showConfidence: Boolean = true
 
   override fun stop() {

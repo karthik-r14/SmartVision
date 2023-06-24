@@ -16,4 +16,5 @@
     <string name="menu_item_3">"Face Recognition</string>
     <string name="menu_item_4">Barcode</string>
     <string name="dashboard_text">Select an option</string>
+    <string name="announcement">Announcement</string>
 </resources>

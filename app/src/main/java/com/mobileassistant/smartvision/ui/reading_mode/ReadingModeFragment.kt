@@ -3,6 +3,7 @@ package com.mobileassistant.smartvision.ui.reading_mode
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.speech.tts.TextToSpeech
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -18,13 +19,15 @@ import com.mobileassistant.smartvision.mlkit.utils.CameraSource
 import com.mobileassistant.smartvision.mlkit.utils.CameraSourcePreview
 import com.mobileassistant.smartvision.mlkit.utils.GraphicOverlay
 import java.io.IOException
+import java.util.Locale
 
-class ReadingModeFragment : Fragment() {
+class ReadingModeFragment : Fragment(), TextToSpeech.OnInitListener {
 
     private var _binding: FragmentReadingModeBinding? = null
     private var cameraSource: CameraSource? = null
     private var preview: CameraSourcePreview? = null
     private var graphicOverlay: GraphicOverlay? = null
+    private var textToSpeech: TextToSpeech? = null
 
     companion object {
         private const val TAG = "ReadingModeScreen"
@@ -41,6 +44,7 @@ class ReadingModeFragment : Fragment() {
         _binding = FragmentReadingModeBinding.inflate(inflater, container, false)
         preview = binding.previewView
         graphicOverlay = binding.graphicOverlay
+        textToSpeech = TextToSpeech(context, this)
 
         if (allPermissionsGranted()) {
             createCameraSource()
@@ -63,11 +67,16 @@ class ReadingModeFragment : Fragment() {
             cameraSource = CameraSource(activity, graphicOverlay)
         }
         try {
-            cameraSource!!.setMachineLearningFrameProcessor(context?.let {
-                TextRecognitionProcessor(
-                    it, DevanagariTextRecognizerOptions.Builder().build()
+            context?.let {
+                val textRecognitionProcessor = TextRecognitionProcessor(
+                    it, DevanagariTextRecognizerOptions.Builder().build(), textToSpeech
                 )
-            })
+                cameraSource!!.setMachineLearningFrameProcessor(textRecognitionProcessor)
+
+                binding.announcementToggleButton.setOnCheckedChangeListener { _, isChecked ->
+                    textRecognitionProcessor.setAnnouncementStatus(isChecked)
+                }
+            }
         } catch (e: Exception) {
             Log.e(TAG, "Can not create image processor:", e)
             Toast.makeText(
@@ -164,5 +173,21 @@ class ReadingModeFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+        textToSpeech?.let {
+            it.stop()
+            it.shutdown()
+        }
+    }
+
+    override fun onInit(status: Int) {
+        if (status == TextToSpeech.SUCCESS) {
+            val result = textToSpeech!!.setLanguage(Locale.US)
+
+            if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
+                Log.e("TTS", "The Language not supported!")
+            } else {
+
+            }
+        }
     }
 }

@@ -63,9 +63,11 @@ class ReadingModeFragment : Fragment() {
             cameraSource = CameraSource(activity, graphicOverlay)
         }
         try {
-            cameraSource!!.setMachineLearningFrameProcessor(
-                context?.let { TextRecognitionProcessor(it, DevanagariTextRecognizerOptions.Builder().build()) }
-            )
+            cameraSource!!.setMachineLearningFrameProcessor(context?.let {
+                TextRecognitionProcessor(
+                    it, DevanagariTextRecognizerOptions.Builder().build()
+                )
+            })
         } catch (e: Exception) {
             Log.e(TAG, "Can not create image processor:", e)
             Toast.makeText(
@@ -146,6 +148,17 @@ class ReadingModeFragment : Fragment() {
         }
         Log.i(TAG, "Permission NOT granted: $permission")
         return false
+    }
+
+    @Deprecated("Deprecated in Java")
+    override fun onRequestPermissionsResult(
+        requestCode: Int, permissions: Array<String>, grantResults: IntArray
+    ) {
+        Log.i(TAG, "Permission granted!")
+        if (allPermissionsGranted()) {
+            createCameraSource()
+        }
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 
     override fun onDestroyView() {

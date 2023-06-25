@@ -185,8 +185,6 @@ class ReadingModeFragment : Fragment(), TextToSpeech.OnInitListener {
 
             if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
                 Log.e("TTS", "The Language not supported!")
-            } else {
-
             }
         }
     }

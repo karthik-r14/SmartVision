@@ -32,6 +32,7 @@ class SplashActivity : ComponentActivity() {
 //                    Greeting("Android")
 //                }
                 startActivity(Intent(this, MainActivity::class.java))
+                finish()
             }
         }
     }

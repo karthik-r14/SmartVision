@@ -29,4 +29,10 @@
         android:label="@string/menu_item_1"
         tools:layout="@layout/fragment_reading_mode" />
 
+    <fragment
+        android:id="@+id/nav_smart_cap"
+        android:name="com.mobileassistant.smartvision.ui.smart_cap.SmartCapFragment"
+        android:label="@string/menu_item_2"
+        tools:layout="@layout/fragment_smart_cap" />
+
 </navigation>

@@ -46,7 +46,7 @@ class HomeFragment : Fragment() {
                     R.drawable.reading_mode,
                     ::navigateToReadingMode
                 ), MenuItem(
-                    getString(R.string.menu_item_2), R.drawable.smart_cap, ::navigateToReadingMode
+                    getString(R.string.menu_item_2), R.drawable.smart_cap, ::navigateToSmartCap
                 ), MenuItem(
                     getString(R.string.menu_item_3),
                     R.drawable.face_recognition,
@@ -63,6 +63,7 @@ class HomeFragment : Fragment() {
     }
 
     private fun navigateToReadingMode() = findNavController().navigate(R.id.nav_reading_mode)
+    private fun navigateToSmartCap() = findNavController().navigate(R.id.nav_smart_cap)
 
     override fun onDestroyView() {
         super.onDestroyView()

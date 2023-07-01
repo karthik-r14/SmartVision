@@ -30,9 +30,9 @@
         tools:layout="@layout/fragment_reading_mode" />
 
     <fragment
-        android:id="@+id/nav_smart_cap"
-        android:name="com.mobileassistant.smartvision.ui.smart_cap.SmartCapFragment"
+        android:id="@+id/nav_object_detection"
+        android:name="com.mobileassistant.smartvision.ui.detect_objects.ObjectDetectionFragment"
         android:label="@string/menu_item_2"
-        tools:layout="@layout/fragment_smart_cap" />
+        tools:layout="@layout/fragment_object_detection" />
 
 </navigation>

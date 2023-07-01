@@ -1,4 +1,4 @@
-package com.mobileassistant.smartvision.ui.smart_cap
+package com.mobileassistant.smartvision.ui.detect_objects
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -15,7 +15,7 @@ import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.label.ImageLabeling
 import com.google.mlkit.vision.label.defaults.ImageLabelerOptions
 import com.mobileassistant.smartvision.R
-import com.mobileassistant.smartvision.databinding.FragmentSmartCapBinding
+import com.mobileassistant.smartvision.databinding.FragmentObjectDetectionBinding
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.launch
@@ -24,9 +24,11 @@ import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
 
-class SmartCapFragment : Fragment() {
+private const val MIN_CONFIDENCE_THRESHOLD = 0.7f
 
-    private var _binding: FragmentSmartCapBinding? = null
+class ObjectDetectionFragment : Fragment() {
+
+    private var _binding: FragmentObjectDetectionBinding? = null
     private var camImageView: ImageView? = null
     private var camTextView: TextView? = null
 
@@ -39,7 +41,7 @@ class SmartCapFragment : Fragment() {
     ): View {
 //        val smartCapViewModel = ViewModelProvider(this).get(SmartCapViewModel::class.java)
 
-        _binding = FragmentSmartCapBinding.inflate(inflater, container, false)
+        _binding = FragmentObjectDetectionBinding.inflate(inflater, container, false)
         val root: View = binding.root
         camImageView = binding.camImageView
         camTextView = binding.camDetectedLabel
@@ -79,14 +81,17 @@ class SmartCapFragment : Fragment() {
         videoBitmap?.let { bitmap ->
             try {
                 image = InputImage.fromBitmap(bitmap, 0)
+                val optionsBuilder =
+                    ImageLabelerOptions.Builder().setConfidenceThreshold(MIN_CONFIDENCE_THRESHOLD)
+                        .build()
+                val labeler = ImageLabeling.getClient(optionsBuilder)
 
-                val labeler = ImageLabeling.getClient(ImageLabelerOptions.DEFAULT_OPTIONS)
                 labeler.process(image).addOnSuccessListener { labels ->
                     var detectedLabelText = ""
                     for (label in labels) {
                         val text = label.text
                         val confidence = label.confidence
-                        detectedLabelText += "Object is : $text Confidence : $confidence \n"
+                        detectedLabelText += "Object is : $text ---- Confidence : $confidence \n"
                     }
                     camTextView?.text = detectedLabelText
                 }.addOnFailureListener { e ->

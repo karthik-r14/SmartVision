@@ -21,7 +21,6 @@ import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.IOException
-import java.net.HttpURLConnection
 import java.net.URL
 
 private const val MIN_CONFIDENCE_THRESHOLD = 0.7f
@@ -29,8 +28,8 @@ private const val MIN_CONFIDENCE_THRESHOLD = 0.7f
 class ObjectDetectionFragment : Fragment() {
 
     private var _binding: FragmentObjectDetectionBinding? = null
-    private var camImageView: ImageView? = null
-    private var camTextView: TextView? = null
+    private lateinit var camImageView: ImageView
+    private lateinit var camTextView: TextView
 
     // This property is only valid between onCreateView and
     // onDestroyView.
@@ -54,7 +53,7 @@ class ObjectDetectionFragment : Fragment() {
             while (true) {
                 val downloadedImage = downloadImageFromUrl(getString(R.string.image_url))
                 withContext(Main) {
-                    camImageView?.setImageBitmap(downloadedImage)
+                    camImageView.setImageBitmap(downloadedImage)
                     detectObstaclesOnImage(downloadedImage)
                 }
             }
@@ -66,10 +65,19 @@ class ObjectDetectionFragment : Fragment() {
     private fun downloadImageFromUrl(imageServerUrl: String): Bitmap? {
         try {
             val url = URL(imageServerUrl)
-            val connection = url.openConnection() as HttpURLConnection
-            connection.connect()
-            val inputStream = connection.inputStream
-            return BitmapFactory.decodeStream(inputStream)
+            val options = BitmapFactory.Options().apply {
+                inJustDecodeBounds = true
+            }
+            BitmapFactory.decodeStream(url.openStream(), null, options)
+            val inSampleSizeVal =
+                calculateInSampleSize(options, camImageView.width, camImageView.height)
+
+            val finalOptions = BitmapFactory.Options().apply {
+                inJustDecodeBounds = false
+                inSampleSize = inSampleSizeVal
+            }
+
+            return BitmapFactory.decodeStream(url.openStream(), null, finalOptions)
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -87,13 +95,18 @@ class ObjectDetectionFragment : Fragment() {
                 val labeler = ImageLabeling.getClient(optionsBuilder)
 
                 labeler.process(image).addOnSuccessListener { labels ->
-                    var detectedLabelText = ""
-                    for (label in labels) {
-                        val text = label.text
-                        val confidence = label.confidence
-                        detectedLabelText += "Object is : $text ---- Confidence : $confidence \n"
+                    if (labels.isEmpty()) {
+                        val nothingDetectText = "No Object is Detected"
+                        camTextView.text = nothingDetectText
+                    } else {
+                        var detectedLabelText = ""
+                        for (label in labels) {
+                            val text = label.text
+                            val confidence = label.confidence
+                            detectedLabelText += "Object is : $text ---- Confidence : $confidence \n"
+                        }
+                        camTextView.text = detectedLabelText
                     }
-                    camTextView?.text = detectedLabelText
                 }.addOnFailureListener { e ->
                     Log.i(
                         "com.example.mobileassistantsample", "Failure Exception = $e"
@@ -106,6 +119,26 @@ class ObjectDetectionFragment : Fragment() {
                 )
             }
         }
+    }
+
+    private fun calculateInSampleSize(options: BitmapFactory.Options, reqWidth: Int, reqHeight: Int): Int {
+        // Raw height and width of image
+        val (height: Int, width: Int) = options.run { outHeight to outWidth }
+        var inSampleSize = 1
+
+        if (height > reqHeight || width > reqWidth) {
+
+            val halfHeight: Int = height / 2
+            val halfWidth: Int = width / 2
+
+            // Calculate the largest inSampleSize value that is a power of 2 and keeps both
+            // height and width larger than the requested height and width.
+            while (halfHeight / inSampleSize >= reqHeight && halfWidth / inSampleSize >= reqWidth) {
+                inSampleSize *= 2
+            }
+        }
+
+        return inSampleSize
     }
 
     override fun onDestroyView() {

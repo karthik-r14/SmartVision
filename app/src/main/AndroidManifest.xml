@@ -16,6 +16,7 @@
         android:roundIcon="@mipmap/splash_icon_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.App.StartingSplash"
+        android:usesCleartextTraffic="true"
         tools:targetApi="31">
 
         <activity

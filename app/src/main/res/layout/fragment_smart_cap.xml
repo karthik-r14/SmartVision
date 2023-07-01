@@ -5,9 +5,26 @@
     android:layout_height="match_parent"
     tools:context=".ui.smart_cap.SmartCapFragment">
 
-    <TextView
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="@string/menu_item_2" />
+        android:orientation="vertical"
+        android:weightSum="2">
+
+        <ImageView
+            android:id="@+id/cam_image_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1.8" />
+
+        <TextView
+            android:id="@+id/cam_detected_label"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.2"
+            android:gravity="center"
+            android:textSize="24sp" />
+
+    </LinearLayout>
 
 </FrameLayout>

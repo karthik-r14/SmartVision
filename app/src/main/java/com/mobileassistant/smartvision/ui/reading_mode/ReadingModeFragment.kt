@@ -12,12 +12,16 @@ import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.google.mlkit.vision.text.devanagari.DevanagariTextRecognizerOptions
 import com.mobileassistant.smartvision.databinding.FragmentReadingModeBinding
 import com.mobileassistant.smartvision.mlkit.textdetector.TextRecognitionProcessor
 import com.mobileassistant.smartvision.mlkit.utils.CameraSource
 import com.mobileassistant.smartvision.mlkit.utils.CameraSourcePreview
 import com.mobileassistant.smartvision.mlkit.utils.GraphicOverlay
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.util.Locale
 
@@ -68,13 +72,17 @@ class ReadingModeFragment : Fragment(), TextToSpeech.OnInitListener {
         }
         try {
             context?.let {
-                val textRecognitionProcessor = TextRecognitionProcessor(
-                    it, DevanagariTextRecognizerOptions.Builder().build(), textToSpeech
-                )
-                cameraSource!!.setMachineLearningFrameProcessor(textRecognitionProcessor)
+                lifecycleScope.launch {
+                    val textRecognitionProcessor = TextRecognitionProcessor(
+                        it, DevanagariTextRecognizerOptions.Builder().build(), textToSpeech
+                    )
+                    cameraSource!!.setMachineLearningFrameProcessor(textRecognitionProcessor)
 
-                binding.announcementToggleButton.setOnCheckedChangeListener { _, isChecked ->
-                    textRecognitionProcessor.setAnnouncementStatus(isChecked)
+                    withContext(Dispatchers.Main) {
+                        binding.announcementToggleButton.setOnCheckedChangeListener { _, isChecked ->
+                            textRecognitionProcessor.setAnnouncementStatus(isChecked)
+                        }
+                    }
                 }
             }
         } catch (e: Exception) {

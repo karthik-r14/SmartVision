@@ -32,6 +32,7 @@ import com.mobileassistant.smartvision.ui.reading_mode.SendValue
 private const val ACTIVATED_STATUS_TEXT = "Announcement Activated"
 private const val DEACTIVATED_STATUS_TEXT = "Announcement Deactivated"
 private const val ANNOUNCEMENT_COMPLETE_DELAY = 2000L
+private const val ANNOUNCEMENT_DELAY = 1000L
 
 /** Processor for the text detector demo. */
 class TextRecognitionProcessor(
@@ -55,7 +56,6 @@ class TextRecognitionProcessor(
     }
 
     override fun onSuccess(text: Text, graphicOverlay: GraphicOverlay) {
-        Log.d(TAG, "On-device Text detection successful")
         announceTextToUserIfEnabled(text.text)
         logExtrasForTesting(text)
         graphicOverlay.add(
@@ -76,6 +76,7 @@ class TextRecognitionProcessor(
     private fun announceTextToUserIfEnabled(textContent: String) {
         if (isAnnouncementEnabled) {
             textToSpeech?.speak(textContent, TextToSpeech.QUEUE_FLUSH, null, "")
+            Thread.sleep(ANNOUNCEMENT_DELAY)
         }
     }
 

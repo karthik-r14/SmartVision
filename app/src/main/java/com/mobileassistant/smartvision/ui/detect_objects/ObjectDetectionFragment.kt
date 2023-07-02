@@ -3,6 +3,7 @@ package com.mobileassistant.smartvision.ui.detect_objects
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
+import android.speech.tts.TextToSpeech
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -16,20 +17,27 @@ import com.google.mlkit.vision.label.ImageLabeling
 import com.google.mlkit.vision.label.defaults.ImageLabelerOptions
 import com.mobileassistant.smartvision.R
 import com.mobileassistant.smartvision.databinding.FragmentObjectDetectionBinding
+import com.mobileassistant.smartvision.mlkit.textdetector.ACTIVATED_STATUS_TEXT
+import com.mobileassistant.smartvision.mlkit.textdetector.DEACTIVATED_STATUS_TEXT
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.net.URL
+import java.util.Locale
 
 private const val MIN_CONFIDENCE_THRESHOLD = 0.7f
 
-class ObjectDetectionFragment : Fragment() {
+private const val NO_OBJECT_DETECTED_TEXT = "No Object is Detected"
+
+class ObjectDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
 
     private var _binding: FragmentObjectDetectionBinding? = null
     private lateinit var camImageView: ImageView
     private lateinit var camTextView: TextView
+    private var textToSpeech: TextToSpeech? = null
+    private var isAnnouncementEnabled: Boolean = false
 
     // This property is only valid between onCreateView and
     // onDestroyView.
@@ -44,6 +52,7 @@ class ObjectDetectionFragment : Fragment() {
         val root: View = binding.root
         camImageView = binding.camImageView
         camTextView = binding.camDetectedLabel
+        textToSpeech = TextToSpeech(context, this)
 //        val textView: TextView = binding.textGallery
 //        galleryViewModel.text.observe(viewLifecycleOwner) {
 //            textView.text = it
@@ -57,6 +66,10 @@ class ObjectDetectionFragment : Fragment() {
                     detectObstaclesOnImage(downloadedImage)
                 }
             }
+        }
+
+        binding.announcementToggleButton.setOnCheckedChangeListener { _, isChecked ->
+            setAnnouncementStatus(isChecked)
         }
 
         return root
@@ -96,7 +109,7 @@ class ObjectDetectionFragment : Fragment() {
 
                 labeler.process(image).addOnSuccessListener { labels ->
                     if (labels.isEmpty()) {
-                        val nothingDetectText = "No Object is Detected"
+                        val nothingDetectText = NO_OBJECT_DETECTED_TEXT
                         camTextView.text = nothingDetectText
                     } else {
                         var detectedLabelText = ""
@@ -104,6 +117,7 @@ class ObjectDetectionFragment : Fragment() {
                             val text = label.text
                             val confidence = label.confidence
                             detectedLabelText += "Object is : $text ---- Confidence : $confidence \n"
+                            announceTextToUserIfEnabled(textContent = text)
                         }
                         camTextView.text = detectedLabelText
                     }
@@ -121,7 +135,9 @@ class ObjectDetectionFragment : Fragment() {
         }
     }
 
-    private fun calculateInSampleSize(options: BitmapFactory.Options, reqWidth: Int, reqHeight: Int): Int {
+    private fun calculateInSampleSize(
+        options: BitmapFactory.Options, reqWidth: Int, reqHeight: Int
+    ): Int {
         // Raw height and width of image
         val (height: Int, width: Int) = options.run { outHeight to outWidth }
         var inSampleSize = 1
@@ -144,5 +160,35 @@ class ObjectDetectionFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+        textToSpeech?.let {
+            it.stop()
+            it.shutdown()
+        }
+    }
+
+    override fun onInit(status: Int) {
+        if (status == TextToSpeech.SUCCESS) {
+            val result = textToSpeech!!.setLanguage(Locale.US)
+
+            if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
+                Log.e("TTS", "The Language not supported!")
+            }
+        }
+    }
+
+    private fun announceTextToUserIfEnabled(textContent: String) {
+        if (isAnnouncementEnabled) {
+            textToSpeech?.speak(textContent, TextToSpeech.QUEUE_ADD, null, "")
+        }
+    }
+
+    private fun setAnnouncementStatus(isEnabled: Boolean) {
+        val statusText = if (isEnabled) {
+            ACTIVATED_STATUS_TEXT
+        } else {
+            DEACTIVATED_STATUS_TEXT
+        }
+        textToSpeech?.speak(statusText, TextToSpeech.QUEUE_FLUSH, null, "")
+        isAnnouncementEnabled = isEnabled
     }
 }

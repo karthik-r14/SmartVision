@@ -29,8 +29,8 @@ import com.mobileassistant.smartvision.mlkit.utils.GraphicOverlay
 import com.mobileassistant.smartvision.mlkit.utils.VisionProcessorBase
 import com.mobileassistant.smartvision.ui.reading_mode.SendValue
 
-private const val ACTIVATED_STATUS_TEXT = "Announcement Activated"
-private const val DEACTIVATED_STATUS_TEXT = "Announcement Deactivated"
+const val ACTIVATED_STATUS_TEXT = "Announcement Activated"
+const val DEACTIVATED_STATUS_TEXT = "Announcement Deactivated"
 
 /** Processor for the text detector demo. */
 class TextRecognitionProcessor(

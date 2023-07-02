@@ -17,5 +17,5 @@
     <string name="menu_item_4">Barcode</string>
     <string name="dashboard_text">Select an option</string>
     <string name="announcement">Announcement</string>
-    <string name="image_url">http://192.168.136.149/jpg</string>
+    <string name="image_url">http://192.168.4.1/jpg</string>
 </resources>

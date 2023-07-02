@@ -19,7 +19,8 @@ import com.mobileassistant.smartvision.mlkit.textdetector.TextRecognitionProcess
 import com.mobileassistant.smartvision.mlkit.utils.CameraSource
 import com.mobileassistant.smartvision.mlkit.utils.CameraSourcePreview
 import com.mobileassistant.smartvision.mlkit.utils.GraphicOverlay
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.IOException
@@ -72,13 +73,13 @@ class ReadingModeFragment : Fragment(), TextToSpeech.OnInitListener {
         }
         try {
             context?.let {
-                lifecycleScope.launch {
+                lifecycleScope.launch(IO) {
                     val textRecognitionProcessor = TextRecognitionProcessor(
                         it, DevanagariTextRecognizerOptions.Builder().build(), textToSpeech
                     )
                     cameraSource!!.setMachineLearningFrameProcessor(textRecognitionProcessor)
 
-                    withContext(Dispatchers.Main) {
+                    withContext(Main) {
                         binding.announcementToggleButton.setOnCheckedChangeListener { _, isChecked ->
                             textRecognitionProcessor.setAnnouncementStatus(isChecked)
                         }

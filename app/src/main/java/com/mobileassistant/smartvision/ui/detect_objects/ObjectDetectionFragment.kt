@@ -2,21 +2,33 @@ package com.mobileassistant.smartvision.ui.detect_objects
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.Rect
 import android.os.Bundle
 import android.speech.tts.TextToSpeech
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
+import android.widget.AdapterView.OnItemSelectedListener
+import android.widget.ArrayAdapter
 import android.widget.ImageView
+import android.widget.Spinner
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import com.google.mlkit.common.model.LocalModel
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.label.ImageLabeling
 import com.google.mlkit.vision.label.defaults.ImageLabelerOptions
+import com.google.mlkit.vision.objects.ObjectDetection
+import com.google.mlkit.vision.objects.custom.CustomObjectDetectorOptions
 import com.mobileassistant.smartvision.R
 import com.mobileassistant.smartvision.databinding.FragmentObjectDetectionBinding
+import com.mobileassistant.smartvision.mlkit.objectdetector.BoxWithText
 import com.mobileassistant.smartvision.mlkit.textdetector.ACTIVATED_STATUS_TEXT
 import com.mobileassistant.smartvision.mlkit.textdetector.DEACTIVATED_STATUS_TEXT
 import kotlinx.coroutines.Dispatchers.IO
@@ -27,17 +39,22 @@ import java.io.IOException
 import java.net.URL
 import java.util.Locale
 
-private const val MIN_CONFIDENCE_THRESHOLD = 0.7f
 
+private const val MIN_CONFIDENCE_THRESHOLD = 0.7f
 private const val NO_OBJECT_DETECTED_TEXT = "No Object is Detected"
+private val modeListArray = arrayOf("Mode-1 Detect Objects", "Mode-2 Track Objects")
+private const val MODE_CHANGED_TEXT = "Mode Changed"
+
 
 class ObjectDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
 
     private var _binding: FragmentObjectDetectionBinding? = null
     private lateinit var camImageView: ImageView
     private lateinit var camTextView: TextView
+    private lateinit var modeSelectionSpinner: Spinner
     private var textToSpeech: TextToSpeech? = null
     private var isAnnouncementEnabled: Boolean = false
+    private var modelSelected = 0
 
     // This property is only valid between onCreateView and
     // onDestroyView.
@@ -46,24 +63,40 @@ class ObjectDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
-//        val smartCapViewModel = ViewModelProvider(this).get(SmartCapViewModel::class.java)
-
         _binding = FragmentObjectDetectionBinding.inflate(inflater, container, false)
         val root: View = binding.root
         camImageView = binding.camImageView
         camTextView = binding.camDetectedLabel
+        modeSelectionSpinner = binding.modeSelectionSpinner
+
+        context?.let {
+            val modeAdapter =
+                ArrayAdapter(it, android.R.layout.simple_spinner_dropdown_item, modeListArray)
+            modeSelectionSpinner.adapter = modeAdapter
+            modeSelectionSpinner.onItemSelectedListener = object : OnItemSelectedListener {
+                override fun onItemSelected(
+                    parent: AdapterView<*>, view: View, position: Int, id: Long
+                ) {
+                    modelSelected = position
+                    textToSpeech?.speak(MODE_CHANGED_TEXT, TextToSpeech.QUEUE_FLUSH, null, "")
+                }
+
+                override fun onNothingSelected(parent: AdapterView<*>) {
+                    // write code to perform some action
+                }
+            }
+        }
         textToSpeech = TextToSpeech(context, this)
-//        val textView: TextView = binding.textGallery
-//        galleryViewModel.text.observe(viewLifecycleOwner) {
-//            textView.text = it
-//        }
 
         lifecycleScope.launch(IO) {
             while (true) {
                 val downloadedImage = downloadImageFromUrl(getString(R.string.image_url))
                 withContext(Main) {
-                    camImageView.setImageBitmap(downloadedImage)
-                    detectObstaclesOnImage(downloadedImage)
+                    if (modelSelected == 0) {
+                        detectAndLabelObjectsOnImage(downloadedImage)
+                    } else {
+                        detectAndTrackObjectsOnImage(downloadedImage)
+                    }
                 }
             }
         }
@@ -71,7 +104,6 @@ class ObjectDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
         binding.announcementToggleButton.setOnCheckedChangeListener { _, isChecked ->
             setAnnouncementStatus(isChecked)
         }
-
         return root
     }
 
@@ -97,11 +129,13 @@ class ObjectDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
         return null
     }
 
-    private fun detectObstaclesOnImage(videoBitmap: Bitmap?) {
+    private fun detectAndLabelObjectsOnImage(imageBitmap: Bitmap?) {
         val image: InputImage
-        videoBitmap?.let { bitmap ->
+        imageBitmap?.let { bitmap ->
             try {
-                image = InputImage.fromBitmap(bitmap, 0)
+                val scaledBitmap = Bitmap.createScaledBitmap(bitmap, 800, 600, false);
+                image = InputImage.fromBitmap(scaledBitmap, 0)
+
                 val optionsBuilder =
                     ImageLabelerOptions.Builder().setConfidenceThreshold(MIN_CONFIDENCE_THRESHOLD)
                         .build()
@@ -116,21 +150,71 @@ class ObjectDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
                         for (label in labels) {
                             val text = label.text
                             val confidence = label.confidence
-                            detectedLabelText += "Object is : $text ---- Confidence : $confidence \n"
+                            detectedLabelText += "Object Detected is : $text ---- Confidence : $confidence \n"
                             announceTextToUserIfEnabled(textContent = text)
                         }
                         camTextView.text = detectedLabelText
                     }
+                    camImageView.setImageBitmap(scaledBitmap)
                 }.addOnFailureListener { e ->
-                    Log.i(
-                        "com.example.mobileassistantsample", "Failure Exception = $e"
-                    )
+                    camImageView.setImageBitmap(scaledBitmap)
                 }
 
             } catch (e: IOException) {
-                Log.i(
-                    "com.example.mobileassistantsample", "IO Exception = $e"
-                )
+                camImageView.setImageBitmap(bitmap)
+            }
+        }
+    }
+
+    private fun detectAndTrackObjectsOnImage(imageBitmap: Bitmap?) {
+        imageBitmap?.let { bitmap ->
+            try {
+                val scaledBitmap = Bitmap.createScaledBitmap(bitmap, 800, 600, false);
+                val image = InputImage.fromBitmap(scaledBitmap, 0)
+
+                val localModel =
+                    LocalModel.Builder().setAssetFilePath("custom_models/object_labeler.tflite")
+                        .build()
+
+                val customObjectDetectorOptions = CustomObjectDetectorOptions.Builder(localModel)
+                    .setDetectorMode(CustomObjectDetectorOptions.SINGLE_IMAGE_MODE)
+                    .enableMultipleObjects().enableClassification()
+                    .setClassificationConfidenceThreshold(MIN_CONFIDENCE_THRESHOLD)
+                    .setMaxPerObjectLabelCount(3).build()
+
+                val objectDetector = ObjectDetection.getClient(customObjectDetectorOptions)
+                objectDetector.process(image).addOnSuccessListener { detectedObjects ->
+                    val list = mutableListOf<BoxWithText>()
+                    val sb = StringBuilder()
+                    for (detectedObject in detectedObjects) {
+                        for (label in detectedObject.labels) {
+                            Log.d(
+                                "Tracking",
+                                sb.append("Object Tracked : ").append(label.text).append(" : ")
+                                    .append(label.confidence).append("\n").toString()
+                            )
+                        }
+                        if (detectedObject.labels.isNotEmpty()) {
+                            list.add(
+                                BoxWithText(
+                                    detectedObject.labels[0].text, detectedObject.boundingBox
+                                )
+                            )
+                            announceTextToUserIfEnabled(textContent = detectedObject.labels[0].text)
+                        }
+                    }
+                    camImageView.setImageBitmap(drawDetectionResult(scaledBitmap, list))
+
+                    if (detectedObjects.isEmpty()) {
+                        camImageView.setImageBitmap(scaledBitmap)
+                    } else {
+                        camTextView.text = sb.toString()
+                    }
+                }.addOnFailureListener { e ->
+                    camImageView.setImageBitmap(scaledBitmap)
+                }
+            } catch (e: IOException) {
+                camImageView.setImageBitmap(bitmap)
             }
         }
     }
@@ -190,5 +274,41 @@ class ObjectDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
         }
         textToSpeech?.speak(statusText, TextToSpeech.QUEUE_FLUSH, null, "")
         isAnnouncementEnabled = isEnabled
+    }
+
+    private fun drawDetectionResult(
+        bitmap: Bitmap, detectionResults: List<BoxWithText>
+    ): Bitmap? {
+        val outputBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true)
+        val canvas = Canvas(outputBitmap)
+        val pen = Paint()
+        pen.textAlign = Paint.Align.LEFT
+        for (box in detectionResults) {
+            // draw bounding box
+            pen.color = Color.RED
+            pen.strokeWidth = 8f
+            pen.style = Paint.Style.STROKE
+            canvas.drawRect(box.rect, pen)
+            val tagSize = Rect(0, 0, 0, 0)
+
+            // calculate the right font size
+            pen.style = Paint.Style.FILL_AND_STROKE
+            pen.color = Color.YELLOW
+            pen.strokeWidth = 2f
+            pen.textSize = 96f
+            pen.getTextBounds(box.text, 0, box.text.length, tagSize)
+            val fontSize: Float = pen.textSize * box.rect.width() / tagSize.width()
+
+            // adjust the font size so texts are inside the bounding box
+            if (fontSize < pen.textSize) {
+                pen.textSize = fontSize
+            }
+            var margin: Float = (box.rect.width() - tagSize.width()) / 2.0f
+            if (margin < 0f) margin = 0f
+            canvas.drawText(
+                box.text, box.rect.left + margin, (box.rect.top + tagSize.height()).toFloat(), pen
+            )
+        }
+        return outputBitmap
     }
 }

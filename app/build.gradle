@@ -45,6 +45,9 @@ android {
             excludes += '/META-INF/{AL2.0,LGPL2.1}'
         }
     }
+    aaptOptions {
+        noCompress "tflite"
+    }
 }
 
 dependencies {
@@ -67,6 +70,8 @@ dependencies {
     implementation 'androidx.compose.material3:material3'
     implementation 'com.google.mlkit:image-labeling:17.0.7'
     implementation 'com.google.mlkit:text-recognition-devanagari:16.0.0'
+    implementation 'com.google.mlkit:object-detection:17.0.0'
+    implementation 'com.google.mlkit:object-detection-custom:17.0.0'
     implementation 'com.google.guava:guava:27.1-android'
     implementation 'com.google.mlkit:camera:16.0.0-beta1'
     // CameraX

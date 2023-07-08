@@ -1,6 +1,7 @@
 package com.mobileassistant.smartvision.ui.reading_mode
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.speech.tts.TextToSpeech
@@ -13,12 +14,15 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import com.google.mlkit.vision.text.devanagari.DevanagariTextRecognizerOptions
 import com.mobileassistant.smartvision.databinding.FragmentReadingModeBinding
 import com.mobileassistant.smartvision.mlkit.textdetector.TextRecognitionProcessor
 import com.mobileassistant.smartvision.mlkit.utils.CameraSource
 import com.mobileassistant.smartvision.mlkit.utils.CameraSourcePreview
 import com.mobileassistant.smartvision.mlkit.utils.GraphicOverlay
+import com.mobileassistant.smartvision.ui.gallery.ANNOUNCEMENT_STATUS_KEY
+import com.mobileassistant.smartvision.ui.gallery.SMART_VISION_PREFERENCES
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.launch
@@ -33,6 +37,8 @@ class ReadingModeFragment : Fragment(), TextToSpeech.OnInitListener {
     private var preview: CameraSourcePreview? = null
     private var graphicOverlay: GraphicOverlay? = null
     private var textToSpeech: TextToSpeech? = null
+    private var sharedPreferences: SharedPreferences? = null
+    private var announcementEnabledStatus: Boolean? = false
 
     companion object {
         private const val TAG = "ReadingModeScreen"
@@ -50,6 +56,10 @@ class ReadingModeFragment : Fragment(), TextToSpeech.OnInitListener {
         preview = binding.previewView
         graphicOverlay = binding.graphicOverlay
         textToSpeech = TextToSpeech(context, this)
+        sharedPreferences = activity?.getSharedPreferences(
+            SMART_VISION_PREFERENCES, Context.MODE_PRIVATE
+        )
+        setupUi()
 
         if (allPermissionsGranted()) {
             createCameraSource()
@@ -62,8 +72,15 @@ class ReadingModeFragment : Fragment(), TextToSpeech.OnInitListener {
 
     override fun onResume() {
         super.onResume()
-        createCameraSource()
-        startCameraSource()
+        if (allPermissionsGranted()) {
+            createCameraSource()
+            startCameraSource()
+        }
+    }
+
+    private fun setupUi() {
+        announcementEnabledStatus = sharedPreferences?.getBoolean(ANNOUNCEMENT_STATUS_KEY, false)
+        binding.announcementToggleButton.isChecked = announcementEnabledStatus == true
     }
 
     private fun createCameraSource() {
@@ -75,7 +92,7 @@ class ReadingModeFragment : Fragment(), TextToSpeech.OnInitListener {
             context?.let {
                 lifecycleScope.launch(IO) {
                     val textRecognitionProcessor = TextRecognitionProcessor(
-                        it, DevanagariTextRecognizerOptions.Builder().build(), textToSpeech
+                        it, DevanagariTextRecognizerOptions.Builder().build(), textToSpeech, announcementEnabledStatus
                     )
                     cameraSource!!.setMachineLearningFrameProcessor(textRecognitionProcessor)
 
@@ -175,6 +192,9 @@ class ReadingModeFragment : Fragment(), TextToSpeech.OnInitListener {
         Log.i(TAG, "Permission granted!")
         if (allPermissionsGranted()) {
             createCameraSource()
+            startCameraSource()
+        } else {
+            findNavController().navigateUp()
         }
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }

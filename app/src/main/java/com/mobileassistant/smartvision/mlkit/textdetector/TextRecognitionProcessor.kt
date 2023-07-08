@@ -36,13 +36,14 @@ const val DEACTIVATED_STATUS_TEXT = "Announcement Deactivated"
 class TextRecognitionProcessor(
     private val context: Context,
     textRecognizerOptions: TextRecognizerOptionsInterface,
-    private val textToSpeech: TextToSpeech? = null
+    private val textToSpeech: TextToSpeech? = null,
+    private val isAnnouncementEnabledOnScreenLoad: Boolean? = false
 ) : VisionProcessorBase<Text>(context), SendValue {
     private val textRecognizer: TextRecognizer = TextRecognition.getClient(textRecognizerOptions)
     private val shouldGroupRecognizedTextInBlocks: Boolean = true
     private val showLanguageTag: Boolean = false
     private val showConfidence: Boolean = true
-    private var isAnnouncementEnabled: Boolean = false
+    private var isAnnouncementEnabled: Boolean = isAnnouncementEnabledOnScreenLoad == true
 
     override fun stop() {
         super.stop()

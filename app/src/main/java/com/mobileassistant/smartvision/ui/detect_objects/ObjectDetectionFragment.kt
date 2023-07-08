@@ -1,5 +1,7 @@
 package com.mobileassistant.smartvision.ui.detect_objects
 
+import android.content.Context
+import android.content.SharedPreferences
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
@@ -31,6 +33,10 @@ import com.mobileassistant.smartvision.databinding.FragmentObjectDetectionBindin
 import com.mobileassistant.smartvision.mlkit.objectdetector.BoxWithText
 import com.mobileassistant.smartvision.mlkit.textdetector.ACTIVATED_STATUS_TEXT
 import com.mobileassistant.smartvision.mlkit.textdetector.DEACTIVATED_STATUS_TEXT
+import com.mobileassistant.smartvision.ui.gallery.ANNOUNCEMENT_STATUS_KEY
+import com.mobileassistant.smartvision.ui.gallery.CAM_SERVER_URL_KEY
+import com.mobileassistant.smartvision.ui.gallery.OBJECT_DETECTION_MODE_KEY
+import com.mobileassistant.smartvision.ui.gallery.SMART_VISION_PREFERENCES
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.launch
@@ -46,15 +52,20 @@ private val modeListArray = arrayOf("Mode-1 Detect Objects", "Mode-2 Track Objec
 private const val MODE_CHANGED_TEXT = "Mode Changed"
 
 
+private const val MODE_DETECT_OBJECTS_POS = 0
+private const val MODE_TRACK_OBJECTS_POS = 1
+
 class ObjectDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
 
     private var _binding: FragmentObjectDetectionBinding? = null
     private lateinit var camImageView: ImageView
     private lateinit var camTextView: TextView
     private lateinit var modeSelectionSpinner: Spinner
+    private var sharedPreferences: SharedPreferences? = null
     private var textToSpeech: TextToSpeech? = null
     private var isAnnouncementEnabled: Boolean = false
-    private var modelSelected = 0
+    private var modeSelected = -1
+    private lateinit var camServerUrl: String
 
     // This property is only valid between onCreateView and
     // onDestroyView.
@@ -68,16 +79,21 @@ class ObjectDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
         camImageView = binding.camImageView
         camTextView = binding.camDetectedLabel
         modeSelectionSpinner = binding.modeSelectionSpinner
+        sharedPreferences = activity?.getSharedPreferences(
+            SMART_VISION_PREFERENCES, Context.MODE_PRIVATE
+        )
+        setupUi()
 
         context?.let {
             val modeAdapter =
                 ArrayAdapter(it, android.R.layout.simple_spinner_dropdown_item, modeListArray)
             modeSelectionSpinner.adapter = modeAdapter
+            modeSelectionSpinner.setSelection(modeSelected)
             modeSelectionSpinner.onItemSelectedListener = object : OnItemSelectedListener {
                 override fun onItemSelected(
                     parent: AdapterView<*>, view: View, position: Int, id: Long
                 ) {
-                    modelSelected = position
+                    modeSelected = position
                     textToSpeech?.speak(MODE_CHANGED_TEXT, TextToSpeech.QUEUE_FLUSH, null, "")
                 }
 
@@ -90,9 +106,9 @@ class ObjectDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
 
         lifecycleScope.launch(IO) {
             while (true) {
-                val downloadedImage = downloadImageFromUrl(getString(R.string.image_url))
+                val downloadedImage = downloadImageFromUrl(camServerUrl)
                 withContext(Main) {
-                    if (modelSelected == 0) {
+                    if (modeSelected == MODE_DETECT_OBJECTS_POS) {
                         detectAndLabelObjectsOnImage(downloadedImage)
                     } else {
                         detectAndTrackObjectsOnImage(downloadedImage)
@@ -105,6 +121,21 @@ class ObjectDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
             setAnnouncementStatus(isChecked)
         }
         return root
+    }
+
+    private fun setupUi() {
+        isAnnouncementEnabled =
+            sharedPreferences?.getBoolean(ANNOUNCEMENT_STATUS_KEY, false) == true
+        binding.announcementToggleButton.isChecked = isAnnouncementEnabled
+
+        modeSelected = if (sharedPreferences?.getBoolean(
+                OBJECT_DETECTION_MODE_KEY, true
+            ) == true
+        ) MODE_DETECT_OBJECTS_POS else MODE_TRACK_OBJECTS_POS
+
+        camServerUrl =
+            sharedPreferences?.getString(CAM_SERVER_URL_KEY, getString(R.string.image_url))
+                .toString()
     }
 
     private fun downloadImageFromUrl(imageServerUrl: String): Bitmap? {

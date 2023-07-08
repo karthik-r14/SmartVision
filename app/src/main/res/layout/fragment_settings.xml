@@ -93,7 +93,7 @@
                 android:id="@+id/camServerUrlEditText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:inputType="numberDecimal"
+                android:inputType="textUri"
                 android:layout_marginStart="@dimen/spacing2x"
                 android:hint="@string/smart_cap_server_url_hint_text" />
         </LinearLayout>

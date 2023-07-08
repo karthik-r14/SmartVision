@@ -21,7 +21,7 @@
     <string name="announcement_status">1. Announcement Status</string>
     <string name="initial_text_label">Set your preferences for the options given below</string>
     <string name="access_point_mode">Access Point Mode</string>
-    <string name="common_network_mode">Common Network mode</string>
+    <string name="common_network_mode">Common Network Mode</string>
     <string name="smart_cap_settings">2. Smart Cap Camera Settings</string>
     <string name="smart_cap_server_url_hint_text">Enter the cam server url.</string>
     <string name="cam_server_url_label">Cam server Url</string>

@@ -57,16 +57,19 @@
             android:textStyle="bold" />
 
         <RadioGroup
+            android:id="@+id/smartCapCamRadioGroup"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content">
 
             <RadioButton
+                android:id="@+id/accessPointModeRadioBtn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/access_point_mode"
                 android:textStyle="bold" />
 
             <RadioButton
+                android:id="@+id/commonNetworkModeRadioBtn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/common_network_mode"
@@ -87,6 +90,7 @@
                 android:textStyle="bold" />
 
             <EditText
+                android:id="@+id/camServerUrlEditText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:inputType="numberDecimal"
@@ -112,16 +116,19 @@
             android:textStyle="bold" />
 
         <RadioGroup
+            android:id="@+id/objectDetectionModeRadioGroup"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content">
 
             <RadioButton
+                android:id="@+id/detectObjectsRadioBtn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/mode_1_detect_object"
                 android:textStyle="bold" />
 
             <RadioButton
+                android:id="@+id/trackObjectsRadioBtn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/mode_2_track_objects"

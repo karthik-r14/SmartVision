@@ -7,5 +7,6 @@
     <dimen name="fab_margin">16dp</dimen>
     <dimen name="spacing1x">8dp</dimen>
     <dimen name="spacing2x">16dp</dimen>
+    <dimen name="spacing4x">32dp</dimen>
     <dimen name="spacing5x">40dp</dimen>
 </resources>

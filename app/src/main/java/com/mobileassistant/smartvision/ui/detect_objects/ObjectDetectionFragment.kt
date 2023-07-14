@@ -39,6 +39,7 @@ import com.mobileassistant.smartvision.ui.gallery.OBJECT_DETECTION_MODE_KEY
 import com.mobileassistant.smartvision.ui.gallery.SMART_VISION_PREFERENCES
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.IOException
@@ -54,6 +55,8 @@ private const val MODE_CHANGED_TEXT = "Mode Changed"
 
 private const val MODE_DETECT_OBJECTS_POS = 0
 private const val MODE_TRACK_OBJECTS_POS = 1
+
+private const val PROCESSING_DELAY_IN_MILLI_SECONDS = 1000L
 
 class ObjectDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
 
@@ -114,6 +117,7 @@ class ObjectDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
                         detectAndTrackObjectsOnImage(downloadedImage)
                     }
                 }
+                delay(PROCESSING_DELAY_IN_MILLI_SECONDS)
             }
         }
 
@@ -139,33 +143,23 @@ class ObjectDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
     }
 
     private fun downloadImageFromUrl(imageServerUrl: String): Bitmap? {
-        try {
-            val url = URL(imageServerUrl)
-            val options = BitmapFactory.Options().apply {
-                inJustDecodeBounds = true
-            }
-            BitmapFactory.decodeStream(url.openStream(), null, options)
-            val inSampleSizeVal =
-                calculateInSampleSize(options, camImageView.width, camImageView.height)
-
-            val finalOptions = BitmapFactory.Options().apply {
-                inJustDecodeBounds = false
-                inSampleSize = inSampleSizeVal
-            }
-
-            return BitmapFactory.decodeStream(url.openStream(), null, finalOptions)
+        return try {
+            val connection = URL(imageServerUrl).openConnection()
+            connection.connect()
+            val inputStream = connection.getInputStream()
+            val bitmap = BitmapFactory.decodeStream(inputStream)
+            inputStream.close()
+            bitmap
         } catch (e: Exception) {
-            e.printStackTrace()
+            null
         }
-        return null
     }
 
     private fun detectAndLabelObjectsOnImage(imageBitmap: Bitmap?) {
         val image: InputImage
         imageBitmap?.let { bitmap ->
             try {
-                val scaledBitmap = Bitmap.createScaledBitmap(bitmap, 800, 600, false);
-                image = InputImage.fromBitmap(scaledBitmap, 0)
+                image = InputImage.fromBitmap(bitmap, 0)
 
                 val optionsBuilder =
                     ImageLabelerOptions.Builder().setConfidenceThreshold(MIN_CONFIDENCE_THRESHOLD)
@@ -186,9 +180,9 @@ class ObjectDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
                         }
                         camTextView.text = detectedLabelText
                     }
-                    camImageView.setImageBitmap(scaledBitmap)
+                    camImageView.setImageBitmap(bitmap)
                 }.addOnFailureListener { e ->
-                    camImageView.setImageBitmap(scaledBitmap)
+                    camImageView.setImageBitmap(bitmap)
                 }
 
             } catch (e: IOException) {
@@ -198,10 +192,10 @@ class ObjectDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
     }
 
     private fun detectAndTrackObjectsOnImage(imageBitmap: Bitmap?) {
+        var bitmapDrawn: Bitmap?
         imageBitmap?.let { bitmap ->
             try {
-                val scaledBitmap = Bitmap.createScaledBitmap(bitmap, 800, 600, false);
-                val image = InputImage.fromBitmap(scaledBitmap, 0)
+                val image = InputImage.fromBitmap(bitmap, 0)
 
                 val localModel =
                     LocalModel.Builder().setAssetFilePath("custom_models/object_labeler.tflite")
@@ -234,15 +228,16 @@ class ObjectDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
                             announceTextToUserIfEnabled(textContent = detectedObject.labels[0].text)
                         }
                     }
-                    camImageView.setImageBitmap(drawDetectionResult(scaledBitmap, list))
+                    bitmapDrawn = drawDetectionResult(bitmap, list)
+                    camImageView.setImageBitmap(bitmapDrawn)
 
                     if (detectedObjects.isEmpty()) {
-                        camImageView.setImageBitmap(scaledBitmap)
+                        camImageView.setImageBitmap(bitmap)
                     } else {
                         camTextView.text = sb.toString()
                     }
                 }.addOnFailureListener { e ->
-                    camImageView.setImageBitmap(scaledBitmap)
+                    camImageView.setImageBitmap(bitmap)
                 }
             } catch (e: IOException) {
                 camImageView.setImageBitmap(bitmap)
@@ -250,27 +245,6 @@ class ObjectDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
         }
     }
 
-    private fun calculateInSampleSize(
-        options: BitmapFactory.Options, reqWidth: Int, reqHeight: Int
-    ): Int {
-        // Raw height and width of image
-        val (height: Int, width: Int) = options.run { outHeight to outWidth }
-        var inSampleSize = 1
-
-        if (height > reqHeight || width > reqWidth) {
-
-            val halfHeight: Int = height / 2
-            val halfWidth: Int = width / 2
-
-            // Calculate the largest inSampleSize value that is a power of 2 and keeps both
-            // height and width larger than the requested height and width.
-            while (halfHeight / inSampleSize >= reqHeight && halfWidth / inSampleSize >= reqWidth) {
-                inSampleSize *= 2
-            }
-        }
-
-        return inSampleSize
-    }
 
     override fun onDestroyView() {
         super.onDestroyView()

@@ -31,5 +31,6 @@
     <string name="restore_default_settings">4. Restore Default settings</string>
     <string name="restore_settings_description">Tap on the button below to reset settings to their original defaults.</string>
     <string name="restore_defaults_button_text">Restore defaults</string>
+    <string name="feature_not_built">This feature is coming soon.</string>
 
 </resources>

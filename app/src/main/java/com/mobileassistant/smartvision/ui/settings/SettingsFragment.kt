@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.EditText
 import android.widget.RadioButton
 import android.widget.RadioGroup
@@ -28,6 +29,7 @@ class SettingsFragment : Fragment() {
     private var objectDetectionModeRadioGroup: RadioGroup? = null
     private var detectObjectsRadioBtn: RadioButton? = null
     private var trackObjectsRadioBtn: RadioButton? = null
+    private var restoreDefaultButton: Button? = null
     private var sharedPreferences: SharedPreferences? = null
 
     // This property is only valid between onCreateView and
@@ -44,6 +46,7 @@ class SettingsFragment : Fragment() {
         detectObjectsRadioBtn = binding.detectObjectsRadioBtn
         trackObjectsRadioBtn = binding.trackObjectsRadioBtn
         camServerUrlEditText = binding.camServerUrlEditText
+        restoreDefaultButton = binding.restoreDefaultBtn
         sharedPreferences = activity?.getSharedPreferences(SMART_VISION_PREFERENCES, MODE_PRIVATE)
 
         setupUi()
@@ -87,6 +90,24 @@ class SettingsFragment : Fragment() {
                     OBJECT_DETECTION_MODE_KEY, false
                 )
             }
+            prefEditor?.apply()
+        }
+
+        restoreDefaultButton?.setOnClickListener {
+            // reset announcement status
+            announcementSwitch?.isChecked = false
+            prefEditor?.putBoolean(ANNOUNCEMENT_STATUS_KEY, false)
+
+            // reset cam server url
+            camServerUrlEditText?.setText(getString(R.string.image_url))
+            prefEditor?.putString(CAM_SERVER_URL_KEY, getString(R.string.image_url))
+
+            // reset object detection settings
+            detectObjectsRadioBtn?.isChecked = true
+            prefEditor?.putBoolean(
+                OBJECT_DETECTION_MODE_KEY, true
+            )
+
             prefEditor?.apply()
         }
     }

@@ -43,6 +43,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.IOException
+import java.math.BigDecimal
+import java.math.RoundingMode.FLOOR
 import java.net.URL
 import java.util.Locale
 
@@ -174,7 +176,9 @@ class ObjectDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
                         var detectedLabelText = ""
                         for (label in labels) {
                             val text = label.text
-                            val confidence = label.confidence
+                            val confidence =
+                                "${BigDecimal(label.confidence * 100.0).setScale(2, FLOOR)}%"
+
                             detectedLabelText += "Object Detected is : $text ---- Confidence : $confidence \n"
                             announceTextToUserIfEnabled(textContent = text)
                         }
@@ -210,19 +214,27 @@ class ObjectDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
                 val objectDetector = ObjectDetection.getClient(customObjectDetectorOptions)
                 objectDetector.process(image).addOnSuccessListener { detectedObjects ->
                     val list = mutableListOf<BoxWithText>()
-                    val sb = StringBuilder()
+                    val formattedText = StringBuilder()
                     for (detectedObject in detectedObjects) {
                         for (label in detectedObject.labels) {
                             Log.d(
                                 "Tracking",
-                                sb.append("Object Tracked : ").append(label.text).append(" : ")
-                                    .append(label.confidence).append("\n").toString()
+                                formattedText.append("Object Tracked : ").append(label.text).append("----")
+                                    .append(
+                                        "Confidence : ${
+                                            BigDecimal(label.confidence * 100.0).setScale(2, FLOOR)
+                                        }%"
+                                    ).append("\n").toString()
                             )
                         }
                         if (detectedObject.labels.isNotEmpty()) {
                             list.add(
                                 BoxWithText(
-                                    detectedObject.labels[0].text, detectedObject.boundingBox
+                                    detectedObject.labels[0].text + " ${
+                                        BigDecimal(detectedObject.labels[0].confidence * 100.0).setScale(
+                                            2, FLOOR
+                                        )
+                                    }%", detectedObject.boundingBox
                                 )
                             )
                             announceTextToUserIfEnabled(textContent = detectedObject.labels[0].text)
@@ -234,7 +246,7 @@ class ObjectDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
                     if (detectedObjects.isEmpty()) {
                         camImageView.setImageBitmap(bitmap)
                     } else {
-                        camTextView.text = sb.toString()
+                        camTextView.text = formattedText.toString()
                     }
                 }.addOnFailureListener { e ->
                     camImageView.setImageBitmap(bitmap)

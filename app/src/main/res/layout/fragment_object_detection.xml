@@ -26,13 +26,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
-
-        <Spinner
-            android:id="@+id/modeSelectionSpinner"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center" />
-
         <TextView
             android:id="@+id/cam_detected_label"
             android:layout_width="match_parent"
@@ -40,6 +33,12 @@
             android:layout_marginHorizontal="@dimen/spacing1x"
             android:textColor="@color/black"
             android:textSize="20sp" />
+
+        <Spinner
+            android:id="@+id/modeSelectionSpinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center" />
 
         <LinearLayout
             android:layout_width="match_parent"

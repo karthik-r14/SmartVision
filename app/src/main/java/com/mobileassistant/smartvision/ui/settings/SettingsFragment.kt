@@ -1,4 +1,4 @@
-package com.mobileassistant.smartvision.ui.gallery
+package com.mobileassistant.smartvision.ui.settings
 
 import android.content.Context.MODE_PRIVATE
 import android.content.SharedPreferences
@@ -17,7 +17,6 @@ import com.mobileassistant.smartvision.databinding.FragmentSettingsBinding
 
 const val SMART_VISION_PREFERENCES = "smart_vision_pref"
 const val ANNOUNCEMENT_STATUS_KEY = "announcement_status_key"
-const val SMART_CAP_CAM_KEY = "smart_cap_cam_key"
 const val CAM_SERVER_URL_KEY = "cam_server_url_key"
 const val OBJECT_DETECTION_MODE_KEY = "object_detection_mode_key"
 
@@ -25,9 +24,6 @@ class SettingsFragment : Fragment() {
 
     private var _binding: FragmentSettingsBinding? = null
     private var announcementSwitch: SwitchMaterial? = null
-    private var smartCapCamRadioGroup: RadioGroup? = null
-    private var accessPointModeRadioBtn: RadioButton? = null
-    private var commonNetworkModeRadioBtn: RadioButton? = null
     private var camServerUrlEditText: EditText? = null
     private var objectDetectionModeRadioGroup: RadioGroup? = null
     private var detectObjectsRadioBtn: RadioButton? = null
@@ -44,12 +40,9 @@ class SettingsFragment : Fragment() {
         _binding = FragmentSettingsBinding.inflate(inflater, container, false)
         val root: View = binding.root
         announcementSwitch = binding.announcementStatusSwitch
-        smartCapCamRadioGroup = binding.smartCapCamRadioGroup
         objectDetectionModeRadioGroup = binding.objectDetectionModeRadioGroup
         detectObjectsRadioBtn = binding.detectObjectsRadioBtn
         trackObjectsRadioBtn = binding.trackObjectsRadioBtn
-        accessPointModeRadioBtn = binding.accessPointModeRadioBtn
-        commonNetworkModeRadioBtn = binding.commonNetworkModeRadioBtn
         camServerUrlEditText = binding.camServerUrlEditText
         sharedPreferences = activity?.getSharedPreferences(SMART_VISION_PREFERENCES, MODE_PRIVATE)
 
@@ -63,9 +56,6 @@ class SettingsFragment : Fragment() {
         val announcementStatus = sharedPreferences?.getBoolean(ANNOUNCEMENT_STATUS_KEY, false)
         announcementSwitch?.isChecked = announcementStatus == true
 
-        val smartCapCamSetting = sharedPreferences?.getBoolean(SMART_CAP_CAM_KEY, true)
-        accessPointModeRadioBtn?.isChecked = smartCapCamSetting == true
-        commonNetworkModeRadioBtn?.isChecked = smartCapCamSetting == false
         val camServerUrl =
             sharedPreferences?.getString(CAM_SERVER_URL_KEY, getString(R.string.image_url))
         camServerUrlEditText?.setText(camServerUrl)
@@ -79,19 +69,6 @@ class SettingsFragment : Fragment() {
         val prefEditor = sharedPreferences?.edit()
         announcementSwitch?.setOnCheckedChangeListener { _, isChecked ->
             prefEditor?.putBoolean(ANNOUNCEMENT_STATUS_KEY, isChecked)
-            prefEditor?.apply()
-        }
-
-        smartCapCamRadioGroup?.setOnCheckedChangeListener { _, checkedId ->
-            when (checkedId) {
-                R.id.accessPointModeRadioBtn -> prefEditor?.putBoolean(
-                    SMART_CAP_CAM_KEY, true
-                )
-
-                R.id.commonNetworkModeRadioBtn -> prefEditor?.putBoolean(
-                    SMART_CAP_CAM_KEY, false
-                )
-            }
             prefEditor?.apply()
         }
 

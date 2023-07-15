@@ -21,8 +21,8 @@ import com.mobileassistant.smartvision.mlkit.textdetector.TextRecognitionProcess
 import com.mobileassistant.smartvision.mlkit.utils.CameraSource
 import com.mobileassistant.smartvision.mlkit.utils.CameraSourcePreview
 import com.mobileassistant.smartvision.mlkit.utils.GraphicOverlay
-import com.mobileassistant.smartvision.ui.gallery.ANNOUNCEMENT_STATUS_KEY
-import com.mobileassistant.smartvision.ui.gallery.SMART_VISION_PREFERENCES
+import com.mobileassistant.smartvision.ui.settings.ANNOUNCEMENT_STATUS_KEY
+import com.mobileassistant.smartvision.ui.settings.SMART_VISION_PREFERENCES
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.launch

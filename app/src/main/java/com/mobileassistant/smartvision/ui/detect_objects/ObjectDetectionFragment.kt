@@ -33,10 +33,10 @@ import com.mobileassistant.smartvision.databinding.FragmentObjectDetectionBindin
 import com.mobileassistant.smartvision.mlkit.objectdetector.BoxWithText
 import com.mobileassistant.smartvision.mlkit.textdetector.ACTIVATED_STATUS_TEXT
 import com.mobileassistant.smartvision.mlkit.textdetector.DEACTIVATED_STATUS_TEXT
-import com.mobileassistant.smartvision.ui.gallery.ANNOUNCEMENT_STATUS_KEY
-import com.mobileassistant.smartvision.ui.gallery.CAM_SERVER_URL_KEY
-import com.mobileassistant.smartvision.ui.gallery.OBJECT_DETECTION_MODE_KEY
-import com.mobileassistant.smartvision.ui.gallery.SMART_VISION_PREFERENCES
+import com.mobileassistant.smartvision.ui.settings.ANNOUNCEMENT_STATUS_KEY
+import com.mobileassistant.smartvision.ui.settings.CAM_SERVER_URL_KEY
+import com.mobileassistant.smartvision.ui.settings.OBJECT_DETECTION_MODE_KEY
+import com.mobileassistant.smartvision.ui.settings.SMART_VISION_PREFERENCES
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.delay

@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".ui.gallery.SettingsFragment">
+    tools:context=".ui.settings.SettingsFragment">
 
     <TextView
         android:layout_width="wrap_content"
@@ -55,26 +55,6 @@
             android:textColor="@color/black"
             android:textSize="24sp"
             android:textStyle="bold" />
-
-        <RadioGroup
-            android:id="@+id/smartCapCamRadioGroup"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
-
-            <RadioButton
-                android:id="@+id/accessPointModeRadioBtn"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/access_point_mode"
-                android:textStyle="bold" />
-
-            <RadioButton
-                android:id="@+id/commonNetworkModeRadioBtn"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/common_network_mode"
-                android:textStyle="bold" />
-        </RadioGroup>
 
         <LinearLayout
             android:layout_width="wrap_content"

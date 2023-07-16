@@ -59,6 +59,7 @@
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
             android:orientation="horizontal">
 
             <TextView
@@ -98,7 +99,8 @@
         <RadioGroup
             android:id="@+id/objectDetectionModeRadioGroup"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal">
 
             <RadioButton
                 android:id="@+id/detectObjectsRadioBtn"
@@ -126,19 +128,44 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/restore_default_settings"
+            android:text="@string/minimum_confidence_threshold"
             android:textColor="@color/black"
             android:textSize="24sp"
             android:textStyle="bold" />
+
+        <Spinner
+            android:id="@+id/confidenceSelectionSpinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingVertical="@dimen/spacing1x"
-            android:layout_gravity="center_vertical"
-            android:text="@string/restore_settings_description"
+            android:layout_gravity="center_horizontal"
+            android:text="@string/min_confidence_label"
             android:textColor="@color/black"
             android:textSize="16sp"
+            android:textStyle="bold" />
+
+
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/spacing2x"
+        android:layout_marginTop="@dimen/spacing4x"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/restore_default_settings"
+            android:textColor="@color/black"
+            android:textSize="24sp"
             android:textStyle="bold" />
 
         <Button
@@ -147,6 +174,17 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:text="@string/restore_defaults_button_text" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingVertical="@dimen/spacing1x"
+            android:layout_gravity="center_horizontal"
+            android:gravity="center_horizontal"
+            android:text="@string/restore_settings_description"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            android:textStyle="bold" />
 
     </LinearLayout>
 

@@ -6,10 +6,13 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
 import android.widget.RadioButton
 import android.widget.RadioGroup
+import android.widget.Spinner
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import com.google.android.material.switchmaterial.SwitchMaterial
@@ -20,6 +23,9 @@ const val SMART_VISION_PREFERENCES = "smart_vision_pref"
 const val ANNOUNCEMENT_STATUS_KEY = "announcement_status_key"
 const val CAM_SERVER_URL_KEY = "cam_server_url_key"
 const val OBJECT_DETECTION_MODE_KEY = "object_detection_mode_key"
+const val MIN_CONFIDENCE_THRESHOLD_KEY = "min_confidence_threshold_key"
+val minConfidenceThresholdArray = arrayOf("50", "60", "70", "80", "90")
+const val DEFAULT_CONFIDENCE_POSITION = 2
 
 class SettingsFragment : Fragment() {
 
@@ -29,6 +35,7 @@ class SettingsFragment : Fragment() {
     private var objectDetectionModeRadioGroup: RadioGroup? = null
     private var detectObjectsRadioBtn: RadioButton? = null
     private var trackObjectsRadioBtn: RadioButton? = null
+    private var confidenceSelectionSpinner: Spinner? = null
     private var restoreDefaultButton: Button? = null
     private var sharedPreferences: SharedPreferences? = null
 
@@ -46,6 +53,7 @@ class SettingsFragment : Fragment() {
         detectObjectsRadioBtn = binding.detectObjectsRadioBtn
         trackObjectsRadioBtn = binding.trackObjectsRadioBtn
         camServerUrlEditText = binding.camServerUrlEditText
+        confidenceSelectionSpinner = binding.confidenceSelectionSpinner
         restoreDefaultButton = binding.restoreDefaultBtn
         sharedPreferences = activity?.getSharedPreferences(SMART_VISION_PREFERENCES, MODE_PRIVATE)
 
@@ -66,6 +74,39 @@ class SettingsFragment : Fragment() {
         val objectDetectionMode = sharedPreferences?.getBoolean(OBJECT_DETECTION_MODE_KEY, true)
         detectObjectsRadioBtn?.isChecked = objectDetectionMode == true
         trackObjectsRadioBtn?.isChecked = objectDetectionMode == false
+
+        val minThresholdConfidencePosition = sharedPreferences?.getInt(
+            MIN_CONFIDENCE_THRESHOLD_KEY, DEFAULT_CONFIDENCE_POSITION
+        ) // position 2 corresponds to 70 percent Confidence in the array given above
+
+
+            val confidenceAdapter = activity?.let {
+                ArrayAdapter(
+                    it, android.R.layout.simple_spinner_dropdown_item, minConfidenceThresholdArray
+                )
+            }
+            confidenceSelectionSpinner?.adapter = confidenceAdapter
+            minThresholdConfidencePosition?.let { position ->
+                confidenceSelectionSpinner?.setSelection(
+                    position
+                )
+            }
+
+
+        confidenceSelectionSpinner?.onItemSelectedListener =
+            object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(
+                    parent: AdapterView<*>, view: View?, position: Int, id: Long
+                ) {
+                    val prefEditor = sharedPreferences?.edit()
+                    prefEditor?.putInt(MIN_CONFIDENCE_THRESHOLD_KEY, position)
+                    prefEditor?.apply()
+                }
+
+                override fun onNothingSelected(parent: AdapterView<*>) {
+                    // write code to perform some action
+                }
+            }
     }
 
     private fun setOnClickListener() {
@@ -107,6 +148,10 @@ class SettingsFragment : Fragment() {
             prefEditor?.putBoolean(
                 OBJECT_DETECTION_MODE_KEY, true
             )
+
+            // reset min confidence threshold
+            confidenceSelectionSpinner?.setSelection(DEFAULT_CONFIDENCE_POSITION)
+            prefEditor?.putInt(MIN_CONFIDENCE_THRESHOLD_KEY, DEFAULT_CONFIDENCE_POSITION)
 
             prefEditor?.apply()
         }

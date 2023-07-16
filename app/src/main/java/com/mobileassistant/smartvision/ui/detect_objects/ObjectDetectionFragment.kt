@@ -35,8 +35,11 @@ import com.mobileassistant.smartvision.mlkit.textdetector.ACTIVATED_STATUS_TEXT
 import com.mobileassistant.smartvision.mlkit.textdetector.DEACTIVATED_STATUS_TEXT
 import com.mobileassistant.smartvision.ui.settings.ANNOUNCEMENT_STATUS_KEY
 import com.mobileassistant.smartvision.ui.settings.CAM_SERVER_URL_KEY
+import com.mobileassistant.smartvision.ui.settings.DEFAULT_CONFIDENCE_POSITION
+import com.mobileassistant.smartvision.ui.settings.MIN_CONFIDENCE_THRESHOLD_KEY
 import com.mobileassistant.smartvision.ui.settings.OBJECT_DETECTION_MODE_KEY
 import com.mobileassistant.smartvision.ui.settings.SMART_VISION_PREFERENCES
+import com.mobileassistant.smartvision.ui.settings.minConfidenceThresholdArray
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.delay
@@ -49,7 +52,6 @@ import java.net.URL
 import java.util.Locale
 
 
-private const val MIN_CONFIDENCE_THRESHOLD = 0.7f
 private const val NO_OBJECT_DETECTED_TEXT = "No Object is Detected"
 private val modeListArray = arrayOf("Mode-1 Detect Objects", "Mode-2 Track Objects")
 private const val MODE_CHANGED_TEXT = "Mode Changed"
@@ -71,6 +73,7 @@ class ObjectDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
     private var isAnnouncementEnabled: Boolean = false
     private var modeSelected = -1
     private lateinit var camServerUrl: String
+    private var min_confidence_threshold: Float = 0.0f
 
     // This property is only valid between onCreateView and
     // onDestroyView.
@@ -87,6 +90,10 @@ class ObjectDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
         sharedPreferences = activity?.getSharedPreferences(
             SMART_VISION_PREFERENCES, Context.MODE_PRIVATE
         )
+        val position = sharedPreferences?.getInt(
+            MIN_CONFIDENCE_THRESHOLD_KEY, DEFAULT_CONFIDENCE_POSITION
+        )
+        min_confidence_threshold = minConfidenceThresholdArray[position!!].toFloat() / 100.0f
         setupUi()
 
         context?.let {
@@ -164,7 +171,7 @@ class ObjectDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
                 image = InputImage.fromBitmap(bitmap, 0)
 
                 val optionsBuilder =
-                    ImageLabelerOptions.Builder().setConfidenceThreshold(MIN_CONFIDENCE_THRESHOLD)
+                    ImageLabelerOptions.Builder().setConfidenceThreshold(min_confidence_threshold)
                         .build()
                 val labeler = ImageLabeling.getClient(optionsBuilder)
 
@@ -208,7 +215,7 @@ class ObjectDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
                 val customObjectDetectorOptions = CustomObjectDetectorOptions.Builder(localModel)
                     .setDetectorMode(CustomObjectDetectorOptions.SINGLE_IMAGE_MODE)
                     .enableMultipleObjects().enableClassification()
-                    .setClassificationConfidenceThreshold(MIN_CONFIDENCE_THRESHOLD)
+                    .setClassificationConfidenceThreshold(min_confidence_threshold)
                     .setMaxPerObjectLabelCount(3).build()
 
                 val objectDetector = ObjectDetection.getClient(customObjectDetectorOptions)

@@ -18,19 +18,21 @@
     <string name="dashboard_text">Select an option</string>
     <string name="announcement">Announcement</string>
     <string name="image_url">http://192.168.4.1/jpg</string>
-    <string name="announcement_status">1. Announcement Status</string>
     <string name="initial_text_label">Set your preferences for the options given below</string>
     <string name="access_point_mode">Access Point Mode</string>
     <string name="common_network_mode">Common Network Mode</string>
-    <string name="smart_cap_settings">2. Smart Cap Camera Settings</string>
     <string name="smart_cap_server_url_hint_text">Enter the cam server url.</string>
     <string name="cam_server_url_label">Cam server Url</string>
     <string name="mode_1_detect_object">Mode 1 - Detect Objects</string>
     <string name="mode_2_track_objects">Mode 2 - Track Objects</string>
+    <string name="announcement_status">1. Announcement Status</string>
+    <string name="smart_cap_settings">2. Smart Cap Camera Settings</string>
     <string name="object_detection_mode_settings">3. Object Detection Mode Settings</string>
-    <string name="restore_default_settings">4. Restore Default settings</string>
-    <string name="restore_settings_description">Tap on the button below to reset settings to their original defaults.</string>
+    <string name="minimum_confidence_threshold">4. Minimum Confidence Threshold</string>
+    <string name="restore_default_settings">5. Restore Default settings</string>
+    <string name="restore_settings_description">Tap on the button above to reset settings to their original defaults.</string>
     <string name="restore_defaults_button_text">Restore defaults</string>
     <string name="feature_not_built">This feature is coming soon.</string>
+    <string name="min_confidence_label">Select minimum confidence(in %) above.</string>
 
 </resources>

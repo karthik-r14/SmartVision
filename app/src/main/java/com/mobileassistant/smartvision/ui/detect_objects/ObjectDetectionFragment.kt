@@ -18,8 +18,10 @@ import android.widget.AdapterView
 import android.widget.AdapterView.OnItemSelectedListener
 import android.widget.ArrayAdapter
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.Spinner
 import android.widget.TextView
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.google.mlkit.common.model.LocalModel
@@ -48,6 +50,7 @@ import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.math.BigDecimal
 import java.math.RoundingMode.FLOOR
+import java.net.InetAddress
 import java.net.URL
 import java.util.Locale
 
@@ -68,12 +71,14 @@ class ObjectDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
     private lateinit var camImageView: ImageView
     private lateinit var camTextView: TextView
     private lateinit var modeSelectionSpinner: Spinner
+    private lateinit var errorLayout: LinearLayout
+    private lateinit var detailItemLayout: LinearLayout
     private var sharedPreferences: SharedPreferences? = null
     private var textToSpeech: TextToSpeech? = null
     private var isAnnouncementEnabled: Boolean = false
     private var modeSelected = -1
     private lateinit var camServerUrl: String
-    private var min_confidence_threshold: Float = 0.0f
+    private var minConfidenceThreshold: Float = 0.0f
 
     // This property is only valid between onCreateView and
     // onDestroyView.
@@ -87,13 +92,15 @@ class ObjectDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
         camImageView = binding.camImageView
         camTextView = binding.camDetectedLabel
         modeSelectionSpinner = binding.modeSelectionSpinner
+        errorLayout = binding.errorLayout
+        detailItemLayout = binding.detectedItemLayout
         sharedPreferences = activity?.getSharedPreferences(
             SMART_VISION_PREFERENCES, Context.MODE_PRIVATE
         )
         val position = sharedPreferences?.getInt(
             MIN_CONFIDENCE_THRESHOLD_KEY, DEFAULT_CONFIDENCE_POSITION
         )
-        min_confidence_threshold = minConfidenceThresholdArray[position!!].toFloat() / 100.0f
+        minConfidenceThreshold = minConfidenceThresholdArray[position!!].toFloat() / 100.0f
         setupUi()
 
         context?.let {
@@ -117,16 +124,28 @@ class ObjectDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
         textToSpeech = TextToSpeech(context, this)
 
         lifecycleScope.launch(IO) {
-            while (true) {
-                val downloadedImage = downloadImageFromUrl(camServerUrl)
-                withContext(Main) {
-                    if (modeSelected == MODE_DETECT_OBJECTS_POS) {
-                        detectAndLabelObjectsOnImage(downloadedImage)
-                    } else {
-                        detectAndTrackObjectsOnImage(downloadedImage)
+            val isPingSuccessful: Boolean
+            val inetAddress = InetAddress.getByName(getString(R.string.image_url_ip_address))
+            isPingSuccessful = inetAddress.isReachable(5000)
+
+            if (isPingSuccessful) {
+                lifecycleScope.launch(IO) {
+                    while (true) {
+                        val downloadedImage = downloadImageFromUrl(camServerUrl)
+                        withContext(Main) {
+                            if (modeSelected == MODE_DETECT_OBJECTS_POS) {
+                                detectAndLabelObjectsOnImage(downloadedImage)
+                            } else {
+                                detectAndTrackObjectsOnImage(downloadedImage)
+                            }
+                        }
+                        delay(PROCESSING_DELAY_IN_MILLI_SECONDS)
                     }
                 }
-                delay(PROCESSING_DELAY_IN_MILLI_SECONDS)
+            } else {
+                withContext(Main) {
+                    showConnectionErrorScreen()
+                }
             }
         }
 
@@ -171,7 +190,7 @@ class ObjectDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
                 image = InputImage.fromBitmap(bitmap, 0)
 
                 val optionsBuilder =
-                    ImageLabelerOptions.Builder().setConfidenceThreshold(min_confidence_threshold)
+                    ImageLabelerOptions.Builder().setConfidenceThreshold(minConfidenceThreshold)
                         .build()
                 val labeler = ImageLabeling.getClient(optionsBuilder)
 
@@ -215,7 +234,7 @@ class ObjectDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
                 val customObjectDetectorOptions = CustomObjectDetectorOptions.Builder(localModel)
                     .setDetectorMode(CustomObjectDetectorOptions.SINGLE_IMAGE_MODE)
                     .enableMultipleObjects().enableClassification()
-                    .setClassificationConfidenceThreshold(min_confidence_threshold)
+                    .setClassificationConfidenceThreshold(minConfidenceThreshold)
                     .setMaxPerObjectLabelCount(3).build()
 
                 val objectDetector = ObjectDetection.getClient(customObjectDetectorOptions)
@@ -226,8 +245,8 @@ class ObjectDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
                         for (label in detectedObject.labels) {
                             Log.d(
                                 "Tracking",
-                                formattedText.append("Object Tracked : ").append(label.text).append("----")
-                                    .append(
+                                formattedText.append("Object Tracked : ").append(label.text)
+                                    .append("----").append(
                                         "Confidence : ${
                                             BigDecimal(label.confidence * 100.0).setScale(2, FLOOR)
                                         }%"
@@ -334,5 +353,11 @@ class ObjectDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
             )
         }
         return outputBitmap
+    }
+
+    private fun showConnectionErrorScreen() {
+        errorLayout.isVisible = true
+        camImageView.isVisible = false
+        detailItemLayout.isVisible = false
     }
 }

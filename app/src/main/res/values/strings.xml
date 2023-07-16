@@ -18,7 +18,6 @@
     <string name="dashboard_text">Select an option</string>
     <string name="announcement">Announcement</string>
     <string name="image_url">http://192.168.4.1/jpg</string>
-    <string name="image_url_ip_address">192.168.4.1</string>
     <string name="initial_text_label">Set your preferences for the options given below</string>
     <string name="access_point_mode">Access Point Mode</string>
     <string name="common_network_mode">Common Network Mode</string>

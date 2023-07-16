@@ -62,8 +62,9 @@ private const val MODE_CHANGED_TEXT = "Mode Changed"
 
 private const val MODE_DETECT_OBJECTS_POS = 0
 private const val MODE_TRACK_OBJECTS_POS = 1
-
 private const val PROCESSING_DELAY_IN_MILLI_SECONDS = 1000L
+private const val TIMEOUT_VALUE_IN_MILLISECONDS = 5000
+private const val TEXT_TO_BE_TRIMMED = "http:// /jpg"
 
 class ObjectDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
 
@@ -125,9 +126,10 @@ class ObjectDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
 
         lifecycleScope.launch(IO) {
             val isPingSuccessful: Boolean
-            val inetAddress = InetAddress.getByName(getString(R.string.image_url_ip_address))
-            isPingSuccessful = inetAddress.isReachable(5000)
-
+            //inetAddress operation is to be made in a background Thread.
+            val inetAddress =
+                InetAddress.getByName(camServerUrl.trim { letter -> letter in TEXT_TO_BE_TRIMMED })
+            isPingSuccessful = inetAddress.isReachable(TIMEOUT_VALUE_IN_MILLISECONDS)
             if (isPingSuccessful) {
                 lifecycleScope.launch(IO) {
                     while (true) {

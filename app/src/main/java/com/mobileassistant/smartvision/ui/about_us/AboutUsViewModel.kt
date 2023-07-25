@@ -1,4 +1,4 @@
-package com.mobileassistant.smartvision.ui.slideshow
+package com.mobileassistant.smartvision.ui.about_us
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData

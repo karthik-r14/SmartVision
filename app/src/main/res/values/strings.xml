@@ -14,7 +14,7 @@
     <string name="menu_item_1">Reading Mode</string>
     <string name="menu_item_2">Detect Objects</string>
     <string name="menu_item_3">Detect Faces</string>
-    <string name="menu_item_4">Barcode</string>
+    <string name="menu_item_4">Scan Code</string>
     <string name="dashboard_text">Select an option</string>
     <string name="announcement">Announcement</string>
     <string name="image_url">http://192.168.4.1/jpg</string>
@@ -36,5 +36,5 @@
     <string name="min_confidence_label">Select minimum confidence(in %) above.</string>
     <string name="error_text_description">You are not connected to Smart Cap.Please connect to it and try again.</string>
     <string name="about_us_content">This app is for visually Impaired/Challenged.\n\nThere are 4 features of this app namely
-        \n\n1. Reading mode - Use this option to recognize text by placing the phone\'s camera over a sheet containing text.\n\n2. Detect Object - Use this feature to detect objects using the camera module on the smart cap.\n\n3. Detect Faces - This feature is coming soon.\n\n4. Barcode - This feature is coming soon.</string>
+        \n\n1. Reading mode - Use this option to recognize text by placing the phone\'s camera over a sheet containing text.\n\n2. Detect Object - Use this feature to detect objects using the camera module on the smart cap.\n\n3. Detect Faces - This feature is coming soon.\n\n4. Scan Code - This feature is coming soon.</string>
 </resources>

@@ -37,4 +37,6 @@
     <string name="error_text_description">You are not connected to Smart Cap.Please connect to it and try again.</string>
     <string name="about_us_content">This app is for visually Impaired/Challenged.\n\nThere are 4 features of this app namely
         \n\n1. Reading mode - Use this option to recognize text by placing the phone\'s camera over a sheet containing text.\n\n2. Detect Object - Use this feature to detect objects using the camera module on the smart cap.\n\n3. Detect Faces - This feature is coming soon.\n\n4. Scan Code - This feature is coming soon.</string>
+    <string name="attempting_to_connect_msg">Attempting to connect to Smart cap....</string>
+    <string name="connection_successful_msg">Connection to Smart cap is Successful.</string>
 </resources>

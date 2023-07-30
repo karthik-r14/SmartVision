@@ -21,6 +21,9 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.Spinner
 import android.widget.TextView
+import android.widget.Toast
+import android.widget.Toast.LENGTH_LONG
+import android.widget.Toast.LENGTH_SHORT
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -103,6 +106,7 @@ class ObjectDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
         )
         minConfidenceThreshold = minConfidenceThresholdArray[position!!].toFloat() / 100.0f
         setupUi()
+        var postConnectionToastShown = false
 
         context?.let {
             val modeAdapter =
@@ -123,18 +127,32 @@ class ObjectDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
             }
         }
         textToSpeech = TextToSpeech(context, this)
+        Toast.makeText(context, getString(R.string.attempting_to_connect_msg), LENGTH_LONG).show()
 
         lifecycleScope.launch(IO) {
-            val isPingSuccessful: Boolean
+            var isPingSuccessful: Boolean
             //inetAddress operation is to be made in a background Thread.
-            val inetAddress =
-                InetAddress.getByName(camServerUrl.trim { letter -> letter in TEXT_TO_BE_TRIMMED })
-            isPingSuccessful = inetAddress.isReachable(TIMEOUT_VALUE_IN_MILLISECONDS)
+            try {
+                val inetAddress =
+                    InetAddress.getByName(camServerUrl.trim { letter -> letter in TEXT_TO_BE_TRIMMED })
+                isPingSuccessful = inetAddress.isReachable(TIMEOUT_VALUE_IN_MILLISECONDS)
+            } catch (exception: Exception) {
+                isPingSuccessful = false
+            }
             if (isPingSuccessful) {
                 lifecycleScope.launch(IO) {
                     while (true) {
                         val downloadedImage = downloadImageFromUrl(camServerUrl)
                         withContext(Main) {
+                            if (!postConnectionToastShown) {
+                                Toast.makeText(
+                                    context,
+                                    getString(R.string.connection_successful_msg),
+                                    LENGTH_SHORT
+                                ).show()
+                                postConnectionToastShown = true
+                            }
+
                             if (modeSelected == MODE_DETECT_OBJECTS_POS) {
                                 detectAndLabelObjectsOnImage(downloadedImage)
                             } else {

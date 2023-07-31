@@ -130,14 +130,13 @@ class ObjectDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
         Toast.makeText(context, getString(R.string.attempting_to_connect_msg), LENGTH_LONG).show()
 
         lifecycleScope.launch(IO) {
-            var isPingSuccessful: Boolean
             //inetAddress operation is to be made in a background Thread.
-            try {
+            val isPingSuccessful: Boolean = try {
                 val inetAddress =
                     InetAddress.getByName(camServerUrl.trim { letter -> letter in TEXT_TO_BE_TRIMMED })
-                isPingSuccessful = inetAddress.isReachable(TIMEOUT_VALUE_IN_MILLISECONDS)
+                inetAddress.isReachable(TIMEOUT_VALUE_IN_MILLISECONDS)
             } catch (exception: Exception) {
-                isPingSuccessful = false
+                false
             }
             if (isPingSuccessful) {
                 lifecycleScope.launch(IO) {

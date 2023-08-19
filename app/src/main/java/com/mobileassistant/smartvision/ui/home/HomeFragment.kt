@@ -64,8 +64,7 @@ class HomeFragment : Fragment() {
     private fun navigateToReadingMode() = findNavController().navigate(R.id.nav_reading_mode)
     private fun navigateToSmartCap() = findNavController().navigate(R.id.nav_object_detection)
 
-    private fun navigateToDetectFaces() =
-        Toast.makeText(context, R.string.feature_not_built, LENGTH_LONG).show()
+    private fun navigateToDetectFaces() = findNavController().navigate(R.id.nav_face_detection)
 
     private fun navigateToBarcodeScanner() =
         Toast.makeText(context, R.string.feature_not_built, LENGTH_LONG).show()

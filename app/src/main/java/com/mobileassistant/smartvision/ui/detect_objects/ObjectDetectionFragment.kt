@@ -65,9 +65,9 @@ private const val MODE_CHANGED_TEXT = "Mode Changed"
 
 private const val MODE_DETECT_OBJECTS_POS = 0
 private const val MODE_TRACK_OBJECTS_POS = 1
-private const val PROCESSING_DELAY_IN_MILLI_SECONDS = 1000L
-private const val TIMEOUT_VALUE_IN_MILLISECONDS = 5000
-private const val TEXT_TO_BE_TRIMMED = "http:// /jpg"
+const val PROCESSING_DELAY_IN_MILLI_SECONDS = 1000L
+const val TIMEOUT_VALUE_IN_MILLISECONDS = 5000
+const val TEXT_TO_BE_TRIMMED = "http:// /jpg"
 
 class ObjectDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
 

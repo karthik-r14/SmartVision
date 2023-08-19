@@ -39,4 +39,5 @@
         \n\n1. Reading mode - Use this option to recognize text by placing the phone\'s camera over a sheet containing text.\n\n2. Detect Object - Use this feature to detect objects using the camera module on the smart cap.\n\n3. Detect Faces - This feature is coming soon.\n\n4. Scan Code - This feature is coming soon.</string>
     <string name="attempting_to_connect_msg">Attempting to connect to Smart cap....</string>
     <string name="connection_successful_msg">Connection to Smart cap is Successful.</string>
+    <string name="number_of_people_text">There are %1$s faces.</string>
 </resources>

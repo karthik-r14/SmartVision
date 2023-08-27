@@ -94,7 +94,6 @@ class FaceDetectionFragment : Fragment() {
                                 postConnectionToastShown = true
                             }
                             detectFacesOnImage(downloadedImage)
-                            camImageView.setImageBitmap(downloadedImage)
                         }
                         delay(PROCESSING_DELAY_IN_MILLI_SECONDS)
                     }
@@ -148,6 +147,7 @@ class FaceDetectionFragment : Fragment() {
 
                 faceDetector.process(image).addOnSuccessListener { faces ->
                     if (faces.isEmpty()) {
+                        camImageView.setImageBitmap(bitmap)
                         camTextView.text = NO_FACE_DETECTED_TEXT
                     } else {
                         getInfoFromFaceDetected(bitmap, faces)
@@ -166,7 +166,8 @@ class FaceDetectionFragment : Fragment() {
         faces?.let {
             val boxes: MutableList<BoxWithText> = mutableListOf()
             for (face in faces) {
-                val boxWithText = BoxWithText(face.trackingId.toString(), face.boundingBox)
+                val faceNumber = (faces.indexOf(face) + 1).toString()
+                val boxWithText = BoxWithText(faceNumber, face.boundingBox)
                 boxes.add(boxWithText)
             }
             val bitmapDrawn = drawDetectionResult(image, boxes)

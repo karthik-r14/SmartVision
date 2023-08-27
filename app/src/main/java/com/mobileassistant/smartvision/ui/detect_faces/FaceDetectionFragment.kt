@@ -9,6 +9,8 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Rect
 import android.os.Bundle
+import android.speech.tts.TextToSpeech
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -26,6 +28,8 @@ import com.google.mlkit.vision.face.FaceDetectorOptions
 import com.mobileassistant.smartvision.R
 import com.mobileassistant.smartvision.databinding.FragmentFaceDetectionBinding
 import com.mobileassistant.smartvision.mlkit.objectdetector.BoxWithText
+import com.mobileassistant.smartvision.mlkit.textdetector.ACTIVATED_STATUS_TEXT
+import com.mobileassistant.smartvision.mlkit.textdetector.DEACTIVATED_STATUS_TEXT
 import com.mobileassistant.smartvision.ui.detect_objects.PROCESSING_DELAY_IN_MILLI_SECONDS
 import com.mobileassistant.smartvision.ui.detect_objects.TEXT_TO_BE_TRIMMED
 import com.mobileassistant.smartvision.ui.detect_objects.TIMEOUT_VALUE_IN_MILLISECONDS
@@ -39,11 +43,12 @@ import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.net.InetAddress
 import java.net.URL
+import java.util.Locale
 
 private const val NO_FACE_DETECTED_TEXT = "No Face is Detected"
 private const val ONE = 1
 
-class FaceDetectionFragment : Fragment() {
+class FaceDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
 
     private var _binding: FragmentFaceDetectionBinding? = null
     private lateinit var camImageView: ImageView
@@ -51,6 +56,7 @@ class FaceDetectionFragment : Fragment() {
     private lateinit var errorLayout: LinearLayout
     private lateinit var detailFacesLayout: LinearLayout
     private var sharedPreferences: SharedPreferences? = null
+    private var textToSpeech: TextToSpeech? = null
     private var isAnnouncementEnabled: Boolean = false
     private lateinit var camServerUrl: String
 
@@ -71,6 +77,7 @@ class FaceDetectionFragment : Fragment() {
 
         setupUi()
         var postConnectionToastShown = false
+        textToSpeech = TextToSpeech(context, this)
 
         lifecycleScope.launch(Dispatchers.IO) {
             //inetAddress operation is to be made in a background Thread.
@@ -104,6 +111,9 @@ class FaceDetectionFragment : Fragment() {
                     showConnectionErrorScreen()
                 }
             }
+        }
+        binding.announcementToggleButton.setOnCheckedChangeListener { _, isChecked ->
+            setAnnouncementStatus(isChecked)
         }
 
         return root
@@ -141,8 +151,7 @@ class FaceDetectionFragment : Fragment() {
                 val faceOptionBuilder = FaceDetectorOptions.Builder()
                     .setPerformanceMode(FaceDetectorOptions.PERFORMANCE_MODE_ACCURATE)
                     .setLandmarkMode(FaceDetectorOptions.LANDMARK_MODE_ALL)
-                    .setClassificationMode(FaceDetectorOptions.CLASSIFICATION_MODE_ALL)
-                    .build()
+                    .setClassificationMode(FaceDetectorOptions.CLASSIFICATION_MODE_ALL).build()
 
                 val faceDetector = FaceDetection.getClient(faceOptionBuilder)
 
@@ -150,6 +159,7 @@ class FaceDetectionFragment : Fragment() {
                     if (faces.isEmpty()) {
                         camImageView.setImageBitmap(bitmap)
                         camTextView.text = NO_FACE_DETECTED_TEXT
+                        announceTextToUserIfEnabled(NO_FACE_DETECTED_TEXT)
                     } else {
                         getInfoFromFaceDetected(bitmap, faces)
                     }
@@ -173,10 +183,15 @@ class FaceDetectionFragment : Fragment() {
             }
             val bitmapDrawn = drawDetectionResult(image, boxes)
             camImageView.setImageBitmap(bitmapDrawn)
-            camTextView.text = if (faces.size == ONE) {
-                getString(R.string.one_face_detected_text)
-            } else {
-                String.format(getString(R.string.more_than_one_face_detected_text), faces.size)
+
+            context?.let {
+                val faceDetectedText = if (faces.size == ONE) {
+                    getString(R.string.one_face_detected_text)
+                } else {
+                    String.format(getString(R.string.more_than_one_face_detected_text), faces.size)
+                }
+                camTextView.text = faceDetectedText
+                announceTextToUserIfEnabled(faceDetectedText)
             }
         }
     }
@@ -220,6 +235,36 @@ class FaceDetectionFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+        textToSpeech?.let {
+            it.stop()
+            it.shutdown()
+        }
+    }
+
+    override fun onInit(status: Int) {
+        if (status == TextToSpeech.SUCCESS) {
+            val result = textToSpeech!!.setLanguage(Locale.US)
+
+            if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
+                Log.e("TTS", "The Language not supported!")
+            }
+        }
+    }
+
+    private fun announceTextToUserIfEnabled(textContent: String) {
+        if (isAnnouncementEnabled) {
+            textToSpeech?.speak(textContent, TextToSpeech.QUEUE_ADD, null, "")
+        }
+    }
+
+    private fun setAnnouncementStatus(isEnabled: Boolean) {
+        val statusText = if (isEnabled) {
+            ACTIVATED_STATUS_TEXT
+        } else {
+            DEACTIVATED_STATUS_TEXT
+        }
+        textToSpeech?.speak(statusText, TextToSpeech.QUEUE_FLUSH, null, "")
+        isAnnouncementEnabled = isEnabled
     }
 
     private fun showConnectionErrorScreen() {

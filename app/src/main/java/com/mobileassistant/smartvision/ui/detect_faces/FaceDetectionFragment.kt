@@ -41,6 +41,7 @@ import java.net.InetAddress
 import java.net.URL
 
 private const val NO_FACE_DETECTED_TEXT = "No Face is Detected"
+private const val ONE = 1
 
 class FaceDetectionFragment : Fragment() {
 
@@ -166,14 +167,17 @@ class FaceDetectionFragment : Fragment() {
         faces?.let {
             val boxes: MutableList<BoxWithText> = mutableListOf()
             for (face in faces) {
-                val faceNumber = (faces.indexOf(face) + 1).toString()
+                val faceNumber = (faces.indexOf(face) + ONE).toString()
                 val boxWithText = BoxWithText(faceNumber, face.boundingBox)
                 boxes.add(boxWithText)
             }
             val bitmapDrawn = drawDetectionResult(image, boxes)
             camImageView.setImageBitmap(bitmapDrawn)
-            camTextView.text =
-                String.format(getString(R.string.number_of_people_text), faces.size)
+            camTextView.text = if (faces.size == ONE) {
+                getString(R.string.one_face_detected_text)
+            } else {
+                String.format(getString(R.string.more_than_one_face_detected_text), faces.size)
+            }
         }
     }
 

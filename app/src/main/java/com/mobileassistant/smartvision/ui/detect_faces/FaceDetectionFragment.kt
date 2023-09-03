@@ -10,7 +10,9 @@ import android.graphics.Paint
 import android.graphics.Rect
 import android.os.Bundle
 import android.speech.tts.TextToSpeech
+import android.util.Base64
 import android.util.Log
+import android.util.Pair
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -30,23 +32,39 @@ import com.mobileassistant.smartvision.databinding.FragmentFaceDetectionBinding
 import com.mobileassistant.smartvision.mlkit.objectdetector.BoxWithText
 import com.mobileassistant.smartvision.mlkit.textdetector.ACTIVATED_STATUS_TEXT
 import com.mobileassistant.smartvision.mlkit.textdetector.DEACTIVATED_STATUS_TEXT
+import com.mobileassistant.smartvision.model.Person
 import com.mobileassistant.smartvision.ui.detect_objects.PROCESSING_DELAY_IN_MILLI_SECONDS
 import com.mobileassistant.smartvision.ui.detect_objects.TEXT_TO_BE_TRIMMED
 import com.mobileassistant.smartvision.ui.detect_objects.TIMEOUT_VALUE_IN_MILLISECONDS
 import com.mobileassistant.smartvision.ui.settings.ANNOUNCEMENT_STATUS_KEY
 import com.mobileassistant.smartvision.ui.settings.CAM_SERVER_URL_KEY
+import com.mobileassistant.smartvision.ui.settings.FACE_IMAGE_KEY
+import com.mobileassistant.smartvision.ui.settings.FACE_NAME_KEY
 import com.mobileassistant.smartvision.ui.settings.SMART_VISION_PREFERENCES
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.tensorflow.lite.Interpreter
+import org.tensorflow.lite.support.common.FileUtil
+import org.tensorflow.lite.support.common.ops.NormalizeOp
+import org.tensorflow.lite.support.image.ImageProcessor
+import org.tensorflow.lite.support.image.TensorImage
+import org.tensorflow.lite.support.image.ops.ResizeOp
 import java.io.IOException
+import java.math.BigDecimal
+import java.math.RoundingMode
 import java.net.InetAddress
 import java.net.URL
+import java.nio.ByteBuffer
+import java.util.Arrays
 import java.util.Locale
+import kotlin.math.sqrt
 
 private const val NO_FACE_DETECTED_TEXT = "No Face is Detected"
 private const val ONE = 1
+private const val FACENET_INPUT_IMAGE_SIZE = 112
+const val EMPTY = ""
 
 class FaceDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
 
@@ -59,6 +77,10 @@ class FaceDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
     private var textToSpeech: TextToSpeech? = null
     private var isAnnouncementEnabled: Boolean = false
     private lateinit var camServerUrl: String
+
+    private var faceNetImageProcessor: ImageProcessor? = null
+    private var faceNetModelInterpreter: Interpreter? = null
+    private var recognisedFaceList: List<Person?> = ArrayList<Person>()
 
     private val binding get() = _binding!!
 
@@ -74,6 +96,25 @@ class FaceDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
         sharedPreferences = activity?.getSharedPreferences(
             SMART_VISION_PREFERENCES, Context.MODE_PRIVATE
         )
+        try {
+            context?.let {
+                faceNetModelInterpreter = Interpreter(
+                    FileUtil.loadMappedFile(it, "custom_models/mobile_face_net.tflite"),
+                    Interpreter.Options()
+                )
+            }
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+
+        faceNetImageProcessor = ImageProcessor.Builder().add(
+            ResizeOp(
+                FACENET_INPUT_IMAGE_SIZE, FACENET_INPUT_IMAGE_SIZE, ResizeOp.ResizeMethod.BILINEAR
+            )
+        ).add(NormalizeOp(0f, 255f)).build()
+
+
+        recognisedFaceList = createRecognizedFaceList()
 
         setupUi()
         var postConnectionToastShown = false
@@ -159,7 +200,6 @@ class FaceDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
                     if (faces.isEmpty()) {
                         camImageView.setImageBitmap(bitmap)
                         camTextView.text = NO_FACE_DETECTED_TEXT
-                        announceTextToUserIfEnabled(NO_FACE_DETECTED_TEXT)
                     } else {
                         getInfoFromFaceDetected(bitmap, faces)
                     }
@@ -176,9 +216,16 @@ class FaceDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
     private fun getInfoFromFaceDetected(image: Bitmap, faces: List<Face>?) {
         faces?.let {
             val boxes: MutableList<BoxWithText> = mutableListOf()
+            var faceRecognized: Pair<Boolean, String> = Pair(false, EMPTY)
             for (face in faces) {
                 val faceNumber = (faces.indexOf(face) + ONE).toString()
-                val boxWithText = BoxWithText(faceNumber, face.boundingBox)
+                // now we have a face, so we can use that to analyse
+                val croppedFaceBitmap: Bitmap? = cropToBBox(image, face.boundingBox, 0)
+
+                croppedFaceBitmap?.let {
+                    faceRecognized = analyzeCroppedFace(croppedFaceBitmap)
+                }
+                val boxWithText = BoxWithText(faceNumber, face.boundingBox, faceRecognized)
                 boxes.add(boxWithText)
             }
             val bitmapDrawn = drawDetectionResult(image, boxes)
@@ -186,9 +233,21 @@ class FaceDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
 
             context?.let {
                 val faceDetectedText = if (faces.size == ONE) {
-                    getString(R.string.one_face_detected_text)
+                    if (faceRecognized.first == true) {
+                        getString(R.string.one_face_detected_text) + " Face Found : " + faceRecognized.second
+                    } else {
+                        getString(R.string.one_face_detected_text)
+                    }
                 } else {
-                    String.format(getString(R.string.more_than_one_face_detected_text), faces.size)
+                    if (faceRecognized.first == true) {
+                        String.format(
+                            getString(R.string.more_than_one_face_detected_text), faces.size
+                        ) + " Face Found : " + faceRecognized.second
+                    } else {
+                        String.format(
+                            getString(R.string.more_than_one_face_detected_text), faces.size
+                        )
+                    }
                 }
                 camTextView.text = faceDetectedText
                 announceTextToUserIfEnabled(faceDetectedText)
@@ -205,7 +264,13 @@ class FaceDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
         pen.textAlign = Paint.Align.LEFT
         for (box in detectionResults) {
             // draw bounding box
-            pen.color = Color.RED
+            pen.color = if (box.additionalInfo.first) {
+                // Use GREEN color if familiar face is recognized
+                Color.GREEN
+            } else {
+                // Use RED color if face is detected.
+                Color.RED
+            }
             pen.strokeWidth = 8f
             pen.style = Paint.Style.STROKE
             canvas.drawRect(box.rect, pen)
@@ -271,5 +336,90 @@ class FaceDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
         errorLayout.isVisible = true
         camImageView.isVisible = false
         detailFacesLayout.isVisible = false
+    }
+
+    private fun cropToBBox(image: Bitmap, boundingBox: Rect, rotation: Int): Bitmap? {
+        val shift = 0
+//        if (rotation != 0) {
+//            val matrix = Matrix()
+//            matrix.postRotate(rotation.toFloat())
+//            croppedImage = Bitmap.createBitmap(image, 0, 0, image.width, image.height, matrix, true)
+//        }
+        return if (boundingBox.top >= 0 && boundingBox.bottom <= image.width && boundingBox.top + boundingBox.height() <= image.height && boundingBox.left >= 0 && boundingBox.left + boundingBox.width() <= image.width) {
+            Bitmap.createBitmap(
+                image,
+                boundingBox.left,
+                boundingBox.top + shift,
+                boundingBox.width(),
+                boundingBox.height()
+            )
+        } else null
+    }
+
+    // looks for the nearest vector in the dataset (using L2 norm)
+    // and returns the pair <name, distance>
+    private fun findNearestFace(vector: FloatArray): Pair<String, Float>? {
+        var ret: Pair<String, Float>? = null
+        for (person in recognisedFaceList) {
+            val name: String? = person?.name
+            val knownVector: FloatArray? = person?.faceVector
+            var distance = 0f
+            knownVector?.let {
+                for (i in vector.indices) {
+                    val diff = vector[i] - knownVector[i]
+                    distance += diff * diff
+                }
+            }
+            distance = sqrt(distance.toDouble()).toFloat()
+            if (ret == null || distance < ret.second) {
+                ret = Pair(name, distance)
+            }
+        }
+        return ret
+    }
+
+    private fun analyzeCroppedFace(faceBitmap: Bitmap): Pair<Boolean, String> {
+        val tensorImage = TensorImage.fromBitmap(faceBitmap)
+        val faceNetByteBuffer: ByteBuffer? = faceNetImageProcessor?.process(tensorImage)?.buffer
+        val faceOutputArray = Array(1) {
+            FloatArray(
+                192
+            )
+        }
+
+        faceNetModelInterpreter?.run(faceNetByteBuffer, faceOutputArray)
+        Log.d("Face recognized", "output array: " + Arrays.deepToString(faceOutputArray))
+
+        if (recognisedFaceList.isNotEmpty()) {
+            val result: Pair<String, Float>? = findNearestFace(faceOutputArray[0])
+            // if distance is within confidence
+            result?.let {
+                if (result.second < 1.0f) {
+                    val confidence =
+                        "${BigDecimal(result.second * 100.0).setScale(2, RoundingMode.FLOOR)}%"
+                    return Pair(true, "Person-${result.first} \n Confidence-${confidence}")
+                }
+            }
+        }
+        return Pair(false, EMPTY)
+    }
+
+    private fun createRecognizedFaceList(): List<Person?> {
+        val encodedImage: String? = sharedPreferences?.getString(FACE_IMAGE_KEY, EMPTY)
+        if (encodedImage?.isNotEmpty() == true) {
+            val b = Base64.decode(encodedImage, Base64.DEFAULT)
+            val savedFaceBitmapImage = BitmapFactory.decodeByteArray(b, 0, b.size)
+            val tensorImage = TensorImage.fromBitmap(savedFaceBitmapImage)
+            val faceNetByteBuffer = faceNetImageProcessor!!.process(tensorImage).buffer
+            val faceOutputArray = Array(1) {
+                FloatArray(
+                    192
+                )
+            }
+            faceNetModelInterpreter!!.run(faceNetByteBuffer, faceOutputArray)
+            return listOf(sharedPreferences?.getString(FACE_NAME_KEY, EMPTY)
+                ?.let { Person(it, faceOutputArray[0]) })
+        }
+        return emptyList()
     }
 }

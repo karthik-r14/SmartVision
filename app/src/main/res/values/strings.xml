@@ -29,7 +29,8 @@
     <string name="smart_cap_settings">2. Smart Cap Camera Settings</string>
     <string name="object_detection_mode_settings">3. Object Detection Mode Settings</string>
     <string name="minimum_confidence_threshold">4. Minimum Confidence Threshold</string>
-    <string name="restore_default_settings">5. Restore Default settings</string>
+    <string name="detect_faces_settings">5. Face detection Settings</string>
+    <string name="restore_default_settings">6. Restore Default settings</string>
     <string name="restore_settings_description">Tap on the button above to reset settings to their original defaults.</string>
     <string name="restore_defaults_button_text">Restore defaults</string>
     <string name="feature_not_built">This feature is coming soon.</string>
@@ -41,4 +42,6 @@
     <string name="connection_successful_msg">Connection to Smart cap is Successful.</string>
     <string name="more_than_one_face_detected_text">There are %1$s faces detected.</string>
     <string name="one_face_detected_text">There is 1 face detected.</string>
+    <string name="add_face_button_text">Add face</string>
+    <string name="enter_face_hint_text">Enter name of Person/Face.</string>
 </resources>

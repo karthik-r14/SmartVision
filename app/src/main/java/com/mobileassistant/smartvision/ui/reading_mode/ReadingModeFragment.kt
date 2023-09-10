@@ -42,7 +42,7 @@ class ReadingModeFragment : Fragment(), TextToSpeech.OnInitListener {
 
     companion object {
         private const val TAG = "ReadingModeScreen"
-        private const val PERMISSION_REQUESTS = 1
+        const val PERMISSION_REQUESTS = 1
     }
 
     // This property is only valid between onCreateView and

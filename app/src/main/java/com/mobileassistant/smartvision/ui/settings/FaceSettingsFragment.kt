@@ -2,13 +2,16 @@ package com.mobileassistant.smartvision.ui.settings
 
 import android.app.Activity
 import android.app.Dialog
+import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Rect
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Base64
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.GONE
@@ -21,8 +24,11 @@ import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -35,6 +41,7 @@ import com.mobileassistant.smartvision.databinding.FragmentFaceSettingsBinding
 import com.mobileassistant.smartvision.db.FaceInfo
 import com.mobileassistant.smartvision.db.FaceInfoDatabase
 import com.mobileassistant.smartvision.db.FaceInfoRepository
+import com.mobileassistant.smartvision.ui.reading_mode.ReadingModeFragment.Companion.PERMISSION_REQUESTS
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 
@@ -47,6 +54,9 @@ class FaceSettingsFragment : Fragment() {
     private var errorFaceTextView: TextView? = null
     private lateinit var faceSettingViewModel: FaceSettingsViewModel
 
+    companion object {
+        private const val TAG = "FaceSettingsScreen"
+    }
 
     // This property is only valid between onCreateView and
     // onDestroyView.
@@ -114,10 +124,6 @@ class FaceSettingsFragment : Fragment() {
         showCroppedFaceInCustomDialog(
             faceInfo.id, bitmapImage, faceInfo.faceName, isEditMode = true
         )
-    }
-
-    private fun initOnClickListener() {
-        addNewFaceButton.setOnClickListener { launchCameraForTakingPicture() }
     }
 
     private fun initObserver() {
@@ -262,5 +268,84 @@ class FaceSettingsFragment : Fragment() {
         } else {
             faceSettingViewModel.insertFace(FaceInfo(null, faceName, sEncodedImage))
         }
+    }
+
+    private fun initOnClickListener() {
+        addNewFaceButton.setOnClickListener {
+            if (allPermissionsGranted()) {
+                launchCameraForTakingPicture()
+            } else {
+                runtimePermissions
+            }
+        }
+    }
+
+    private fun allPermissionsGranted(): Boolean {
+        for (permission in requiredPermissions) {
+            if (!isPermissionGranted(context, permission)) {
+                return false
+            }
+        }
+        return true
+    }
+
+    private val runtimePermissions: Unit
+        get() {
+            val allNeededPermissions: MutableList<String?> = ArrayList()
+            for (permission in requiredPermissions) {
+                if (!isPermissionGranted(context, permission)) {
+                    allNeededPermissions.add(permission)
+                }
+            }
+            if (allNeededPermissions.isNotEmpty()) {
+                activity?.let {
+                    ActivityCompat.requestPermissions(
+                        it, allNeededPermissions.toTypedArray(), PERMISSION_REQUESTS
+                    )
+                }
+            }
+        }
+
+    private val requiredPermissions: Array<String?>
+        get() = try {
+            val info = activity?.packageName?.let {
+                activity?.packageManager?.getPackageInfo(it, PackageManager.GET_PERMISSIONS)
+            }
+            val ps = info?.requestedPermissions
+            if (!ps.isNullOrEmpty()) {
+                ps
+            } else {
+                arrayOfNulls(0)
+            }
+        } catch (e: Exception) {
+            arrayOfNulls(0)
+        }
+
+    private fun isPermissionGranted(
+        context: Context?, permission: String?
+    ): Boolean {
+        if (context?.let {
+                ContextCompat.checkSelfPermission(
+                    it, permission!!
+                )
+            } == PackageManager.PERMISSION_GRANTED) {
+            Log.i(TAG, "Permission granted: $permission")
+            return true
+        }
+        Log.i(TAG, "Permission NOT granted: $permission")
+        return false
+    }
+
+    @Deprecated("Deprecated in Java")
+    override fun onRequestPermissionsResult(
+        requestCode: Int, permissions: Array<String>, grantResults: IntArray
+    ) {
+        Log.i(TAG, "Permission granted!")
+        if (allPermissionsGranted()) {
+            launchCameraForTakingPicture()
+        } else {
+            findNavController().navigateUp()
+        }
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 }

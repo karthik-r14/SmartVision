@@ -22,6 +22,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.face.Face
@@ -29,6 +30,9 @@ import com.google.mlkit.vision.face.FaceDetection
 import com.google.mlkit.vision.face.FaceDetectorOptions
 import com.mobileassistant.smartvision.R
 import com.mobileassistant.smartvision.databinding.FragmentFaceDetectionBinding
+import com.mobileassistant.smartvision.db.FaceInfo
+import com.mobileassistant.smartvision.db.FaceInfoDatabase
+import com.mobileassistant.smartvision.db.FaceInfoRepository
 import com.mobileassistant.smartvision.mlkit.objectdetector.BoxWithText
 import com.mobileassistant.smartvision.mlkit.textdetector.ACTIVATED_STATUS_TEXT
 import com.mobileassistant.smartvision.mlkit.textdetector.DEACTIVATED_STATUS_TEXT
@@ -38,6 +42,8 @@ import com.mobileassistant.smartvision.ui.detect_objects.TEXT_TO_BE_TRIMMED
 import com.mobileassistant.smartvision.ui.detect_objects.TIMEOUT_VALUE_IN_MILLISECONDS
 import com.mobileassistant.smartvision.ui.settings.ANNOUNCEMENT_STATUS_KEY
 import com.mobileassistant.smartvision.ui.settings.CAM_SERVER_URL_KEY
+import com.mobileassistant.smartvision.ui.settings.FaceSettingsViewModel
+import com.mobileassistant.smartvision.ui.settings.FaceSettingsViewModelFactory
 import com.mobileassistant.smartvision.ui.settings.SMART_VISION_PREFERENCES
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -80,6 +86,8 @@ class FaceDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
     private var faceNetModelInterpreter: Interpreter? = null
     private var recognisedFaceList: List<Person?> = ArrayList<Person>()
 
+    private lateinit var faceSettingViewModel: FaceSettingsViewModel
+
     private val binding get() = _binding!!
 
     override fun onCreateView(
@@ -94,6 +102,17 @@ class FaceDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
         sharedPreferences = activity?.getSharedPreferences(
             SMART_VISION_PREFERENCES, Context.MODE_PRIVATE
         )
+
+        activity?.let {
+            val faceInfoDAO = FaceInfoDatabase.getInstance(it.application)?.faceInfoDAO
+            val repository = FaceInfoRepository(faceInfoDAO!!)
+            val factory = FaceSettingsViewModelFactory(repository)
+            faceSettingViewModel =
+                ViewModelProvider(this, factory)[FaceSettingsViewModel::class.java]
+        }
+
+        retrieveSavedFacesFromDatabase()
+
         try {
             context?.let {
                 faceNetModelInterpreter = Interpreter(
@@ -110,9 +129,6 @@ class FaceDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
                 FACENET_INPUT_IMAGE_SIZE, FACENET_INPUT_IMAGE_SIZE, ResizeOp.ResizeMethod.BILINEAR
             )
         ).add(NormalizeOp(0f, 255f)).build()
-
-
-        recognisedFaceList = createRecognizedFaceList()
 
         setupUi()
         var postConnectionToastShown = false
@@ -166,6 +182,12 @@ class FaceDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
         camServerUrl =
             sharedPreferences?.getString(CAM_SERVER_URL_KEY, getString(R.string.image_url))
                 .toString()
+    }
+
+    private fun retrieveSavedFacesFromDatabase() {
+        faceSettingViewModel.faces.observe(viewLifecycleOwner) { faceList ->
+            recognisedFaceList = createRecognizedFaceList(faceList)
+        }
     }
 
     private fun downloadImageFromUrl(imageServerUrl: String): Bitmap? {
@@ -402,23 +424,25 @@ class FaceDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
         return Pair(false, EMPTY)
     }
 
-    private fun createRecognizedFaceList(): List<Person?> {
-        // Retrive faceInfo from room data storage instead of shared pref
-        val encodedImage: String? = sharedPreferences?.getString("FACE_IMAGE_KEY", EMPTY)
-        if (encodedImage?.isNotEmpty() == true) {
-            val b = Base64.decode(encodedImage, Base64.DEFAULT)
-            val savedFaceBitmapImage = BitmapFactory.decodeByteArray(b, 0, b.size)
-            val tensorImage = TensorImage.fromBitmap(savedFaceBitmapImage)
-            val faceNetByteBuffer = faceNetImageProcessor!!.process(tensorImage).buffer
-            val faceOutputArray = Array(1) {
-                FloatArray(
-                    192
-                )
+    private fun createRecognizedFaceList(retrievedFaceList: List<FaceInfo>): List<Person?> {
+        val createdRecognizedFaceList = mutableListOf<Person>()
+        retrievedFaceList.forEach { faceInfo ->
+            val encodedFaceImage = faceInfo.faceImage
+            if (encodedFaceImage.isNotEmpty()) {
+                val b = Base64.decode(encodedFaceImage, Base64.DEFAULT)
+                val savedFaceBitmapImage = BitmapFactory.decodeByteArray(b, 0, b.size)
+                val tensorImage = TensorImage.fromBitmap(savedFaceBitmapImage)
+                val faceNetByteBuffer = faceNetImageProcessor!!.process(tensorImage).buffer
+                val faceOutputArray = Array(1) {
+                    FloatArray(
+                        192
+                    )
+                }
+                faceNetModelInterpreter!!.run(faceNetByteBuffer, faceOutputArray)
+                createdRecognizedFaceList.add(Person(faceInfo.faceName, faceOutputArray[0]))
             }
-            faceNetModelInterpreter!!.run(faceNetByteBuffer, faceOutputArray)
-            return listOf(sharedPreferences?.getString("FACE_NAME_KEY", EMPTY)
-                ?.let { Person(it, faceOutputArray[0]) })
         }
-        return emptyList()
+
+        return createdRecognizedFaceList
     }
 }

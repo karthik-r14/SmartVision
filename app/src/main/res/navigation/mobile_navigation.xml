@@ -41,4 +41,10 @@
         android:label="@string/menu_item_3"
         tools:layout="@layout/fragment_face_detection" />
 
+    <fragment
+        android:id="@+id/nav_face_settings"
+        android:name="com.mobileassistant.smartvision.ui.settings.FaceSettingsFragment"
+        android:label="@string/face_settings"
+        tools:layout="@layout/fragment_face_settings" />
+
 </navigation>

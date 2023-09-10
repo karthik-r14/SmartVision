@@ -192,12 +192,12 @@
                     android:inputType="text" />
 
                 <Button
-                    android:id="@+id/add_face_button"
+                    android:id="@+id/go_to_face_settings_button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:layout_marginStart="@dimen/spacing2x"
-                    android:text="@string/add_face_button_text"/>
+                    android:text="@string/go_to_face_settings"/>
             </LinearLayout>
 
         </LinearLayout>

@@ -24,6 +24,7 @@ import android.widget.Spinner
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import com.google.android.material.switchmaterial.SwitchMaterial
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.face.Face
@@ -58,7 +59,7 @@ class SettingsFragment : Fragment() {
     private var trackObjectsRadioBtn: RadioButton? = null
     private var confidenceSelectionSpinner: Spinner? = null
     private var restoreDefaultButton: Button? = null
-    private var addFaceButton: Button? = null
+    private var gotoFaceSettingsButton: Button? = null
     private var familiarFaceImageView: ImageView? = null
     private var faceNameEditText: EditText? = null
     private var sharedPreferences: SharedPreferences? = null
@@ -80,7 +81,7 @@ class SettingsFragment : Fragment() {
         camServerUrlEditText = binding.camServerUrlEditText
         confidenceSelectionSpinner = binding.confidenceSelectionSpinner
         restoreDefaultButton = binding.restoreDefaultBtn
-        addFaceButton = binding.addFaceButton
+        gotoFaceSettingsButton = binding.goToFaceSettingsButton
         familiarFaceImageView = binding.familiarFaceImageview
         faceNameEditText = binding.faceNameEditText
         sharedPreferences = activity?.getSharedPreferences(SMART_VISION_PREFERENCES, MODE_PRIVATE)
@@ -171,8 +172,9 @@ class SettingsFragment : Fragment() {
             prefEditor?.apply()
         }
 
-        addFaceButton?.setOnClickListener {
-            launchCameraForTakingPicture()
+        gotoFaceSettingsButton?.setOnClickListener {
+            findNavController().navigate(R.id.nav_face_settings)
+            //            launchCameraForTakingPicture()
         }
 
         restoreDefaultButton?.setOnClickListener {

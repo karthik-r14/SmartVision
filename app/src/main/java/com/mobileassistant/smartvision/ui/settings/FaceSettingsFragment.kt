@@ -2,9 +2,7 @@ package com.mobileassistant.smartvision.ui.settings
 
 import android.app.Activity
 import android.app.Dialog
-import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Rect
@@ -44,7 +42,6 @@ class FaceSettingsFragment : Fragment() {
 
     private var _binding: FragmentFaceSettingsBinding? = null
     private lateinit var addNewFaceButton: Button
-    private var sharedPreferences: SharedPreferences? = null
     private var allFacesRecyclerView: RecyclerView? = null
     private var errorFaceImageView: ImageView? = null
     private var errorFaceTextView: TextView? = null
@@ -70,9 +67,6 @@ class FaceSettingsFragment : Fragment() {
         }
         allFacesRecyclerView = binding.allFacesRecyclerView
         addNewFaceButton = binding.addNewFaceButton
-        sharedPreferences = activity?.getSharedPreferences(
-            SMART_VISION_PREFERENCES, Context.MODE_PRIVATE
-        )
         errorFaceImageView = binding.errorFaceImageView
         errorFaceTextView = binding.errorFaceTextview
 

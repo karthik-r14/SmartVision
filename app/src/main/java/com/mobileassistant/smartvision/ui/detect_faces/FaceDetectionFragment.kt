@@ -38,8 +38,6 @@ import com.mobileassistant.smartvision.ui.detect_objects.TEXT_TO_BE_TRIMMED
 import com.mobileassistant.smartvision.ui.detect_objects.TIMEOUT_VALUE_IN_MILLISECONDS
 import com.mobileassistant.smartvision.ui.settings.ANNOUNCEMENT_STATUS_KEY
 import com.mobileassistant.smartvision.ui.settings.CAM_SERVER_URL_KEY
-import com.mobileassistant.smartvision.ui.settings.FACE_IMAGE_KEY
-import com.mobileassistant.smartvision.ui.settings.FACE_NAME_KEY
 import com.mobileassistant.smartvision.ui.settings.SMART_VISION_PREFERENCES
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -405,7 +403,8 @@ class FaceDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
     }
 
     private fun createRecognizedFaceList(): List<Person?> {
-        val encodedImage: String? = sharedPreferences?.getString(FACE_IMAGE_KEY, EMPTY)
+        // Retrive faceInfo from room data storage instead of shared pref
+        val encodedImage: String? = sharedPreferences?.getString("FACE_IMAGE_KEY", EMPTY)
         if (encodedImage?.isNotEmpty() == true) {
             val b = Base64.decode(encodedImage, Base64.DEFAULT)
             val savedFaceBitmapImage = BitmapFactory.decodeByteArray(b, 0, b.size)
@@ -417,7 +416,7 @@ class FaceDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
                 )
             }
             faceNetModelInterpreter!!.run(faceNetByteBuffer, faceOutputArray)
-            return listOf(sharedPreferences?.getString(FACE_NAME_KEY, EMPTY)
+            return listOf(sharedPreferences?.getString("FACE_NAME_KEY", EMPTY)
                 ?.let { Person(it, faceOutputArray[0]) })
         }
         return emptyList()

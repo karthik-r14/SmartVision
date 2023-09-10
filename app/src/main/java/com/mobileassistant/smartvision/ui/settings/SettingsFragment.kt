@@ -1,15 +1,8 @@
 package com.mobileassistant.smartvision.ui.settings
 
-import android.app.Activity.RESULT_OK
 import android.content.Context.MODE_PRIVATE
-import android.content.Intent
 import android.content.SharedPreferences
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.graphics.Rect
 import android.os.Bundle
-import android.provider.MediaStore
-import android.util.Base64
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,24 +10,15 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
-import android.widget.ImageView
 import android.widget.RadioButton
 import android.widget.RadioGroup
 import android.widget.Spinner
-import androidx.core.content.res.ResourcesCompat
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.switchmaterial.SwitchMaterial
-import com.google.mlkit.vision.common.InputImage
-import com.google.mlkit.vision.face.Face
-import com.google.mlkit.vision.face.FaceDetection
-import com.google.mlkit.vision.face.FaceDetectorOptions
 import com.mobileassistant.smartvision.R
 import com.mobileassistant.smartvision.databinding.FragmentSettingsBinding
-import com.mobileassistant.smartvision.ui.detect_faces.EMPTY
-import java.io.ByteArrayOutputStream
-import java.io.IOException
 
 
 const val SMART_VISION_PREFERENCES = "smart_vision_pref"
@@ -45,8 +29,6 @@ const val MIN_CONFIDENCE_THRESHOLD_KEY = "min_confidence_threshold_key"
 val minConfidenceThresholdArray = arrayOf("50", "60", "70", "80", "90")
 const val DEFAULT_CONFIDENCE_POSITION = 2
 const val CAMERA_REQUEST = 100
-const val FACE_IMAGE_KEY = "face_image_key"
-const val FACE_NAME_KEY = "face_name_key"
 
 
 class SettingsFragment : Fragment() {
@@ -60,8 +42,6 @@ class SettingsFragment : Fragment() {
     private var confidenceSelectionSpinner: Spinner? = null
     private var restoreDefaultButton: Button? = null
     private var gotoFaceSettingsButton: Button? = null
-    private var familiarFaceImageView: ImageView? = null
-    private var faceNameEditText: EditText? = null
     private var sharedPreferences: SharedPreferences? = null
     private var prefEditor: SharedPreferences.Editor? = null
 
@@ -82,8 +62,6 @@ class SettingsFragment : Fragment() {
         confidenceSelectionSpinner = binding.confidenceSelectionSpinner
         restoreDefaultButton = binding.restoreDefaultBtn
         gotoFaceSettingsButton = binding.goToFaceSettingsButton
-        familiarFaceImageView = binding.familiarFaceImageview
-        faceNameEditText = binding.faceNameEditText
         sharedPreferences = activity?.getSharedPreferences(SMART_VISION_PREFERENCES, MODE_PRIVATE)
 
         setupUi()
@@ -121,9 +99,6 @@ class SettingsFragment : Fragment() {
             )
         }
 
-        val faceName = sharedPreferences?.getString(FACE_NAME_KEY, EMPTY)
-        faceNameEditText?.setText(faceName)
-
         confidenceSelectionSpinner?.onItemSelectedListener =
             object : AdapterView.OnItemSelectedListener {
                 override fun onItemSelected(
@@ -138,8 +113,6 @@ class SettingsFragment : Fragment() {
                     // write code to perform some action
                 }
             }
-
-        retrieveFaceImageFromSharedPreferencesAndSetImageview()
     }
 
     private fun setOnClickListener() {
@@ -151,11 +124,6 @@ class SettingsFragment : Fragment() {
 
         camServerUrlEditText?.doAfterTextChanged {
             prefEditor?.putString(CAM_SERVER_URL_KEY, camServerUrlEditText?.text.toString())
-            prefEditor?.apply()
-        }
-
-        faceNameEditText?.doAfterTextChanged {
-            prefEditor?.putString(FACE_NAME_KEY, faceNameEditText?.text.toString())
             prefEditor?.apply()
         }
 
@@ -196,111 +164,8 @@ class SettingsFragment : Fragment() {
             confidenceSelectionSpinner?.setSelection(DEFAULT_CONFIDENCE_POSITION)
             prefEditor?.putInt(MIN_CONFIDENCE_THRESHOLD_KEY, DEFAULT_CONFIDENCE_POSITION)
 
-            prefEditor?.putString(FACE_IMAGE_KEY, EMPTY)
-            prefEditor?.putString(FACE_NAME_KEY, EMPTY)
-            familiarFaceImageView?.setImageDrawable(
-                ResourcesCompat.getDrawable(
-                    resources, R.drawable.face_recognition, null
-                )
-            )
-            faceNameEditText?.setText(EMPTY)
-
             prefEditor?.apply()
         }
-    }
-
-    private fun launchCameraForTakingPicture() {
-        val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-        startActivityForResult(intent, CAMERA_REQUEST)
-    }
-
-    @Deprecated("Deprecated in Java")
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == CAMERA_REQUEST && resultCode == RESULT_OK) {
-            val pictureClicked = data?.extras?.get("data") as Bitmap
-            detectFacesOnImage(pictureClicked)
-        }
-    }
-
-    private fun saveImageInSharedPreferences(image: Bitmap) {
-        val byteArrayOutputStream = ByteArrayOutputStream()
-        image.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream)
-
-        val compressImage = byteArrayOutputStream.toByteArray()
-        val sEncodedImage: String = Base64.encodeToString(compressImage, Base64.DEFAULT)
-
-        prefEditor?.putString(FACE_IMAGE_KEY, sEncodedImage)
-        prefEditor?.apply()
-    }
-
-    private fun retrieveFaceImageFromSharedPreferencesAndSetImageview() {
-        val encodedImage: String? = sharedPreferences?.getString(FACE_IMAGE_KEY, EMPTY)
-        if (encodedImage?.isNotEmpty() == true) {
-            val b = Base64.decode(encodedImage, Base64.DEFAULT)
-            val bitmapImage = BitmapFactory.decodeByteArray(b, 0, b.size)
-            familiarFaceImageView?.setImageBitmap(bitmapImage)
-        }
-    }
-
-    private fun detectFacesOnImage(imageBitmap: Bitmap?) {
-        val image: InputImage
-        imageBitmap?.let { bitmap ->
-            try {
-                image = InputImage.fromBitmap(bitmap, 0)
-
-                val faceOptionBuilder = FaceDetectorOptions.Builder()
-                    .setPerformanceMode(FaceDetectorOptions.PERFORMANCE_MODE_ACCURATE)
-                    .setLandmarkMode(FaceDetectorOptions.LANDMARK_MODE_ALL)
-                    .setClassificationMode(FaceDetectorOptions.CLASSIFICATION_MODE_ALL).build()
-
-                val faceDetector = FaceDetection.getClient(faceOptionBuilder)
-
-                faceDetector.process(image).addOnSuccessListener { faces ->
-                    if (faces.isEmpty()) {
-                        familiarFaceImageView?.setImageBitmap(bitmap)
-                    } else {
-                        getInfoFromFaceDetected(bitmap, faces)
-                    }
-                }.addOnFailureListener { e ->
-                    familiarFaceImageView?.setImageBitmap(bitmap)
-                }
-
-            } catch (e: IOException) {
-                familiarFaceImageView?.setImageBitmap(bitmap)
-            }
-        }
-    }
-
-    private fun getInfoFromFaceDetected(image: Bitmap, faces: List<Face>?) {
-        faces?.let {
-            var croppedFaceBitmap: Bitmap? = null
-            for (face in faces) {
-                croppedFaceBitmap = cropToBBox(image, face.boundingBox, 0)
-            }
-            familiarFaceImageView?.setImageBitmap(croppedFaceBitmap)
-            if (croppedFaceBitmap != null) {
-                saveImageInSharedPreferences(croppedFaceBitmap)
-            }
-        }
-    }
-
-    private fun cropToBBox(image: Bitmap, boundingBox: Rect, rotation: Int): Bitmap? {
-        val shift = 0
-//        if (rotation != 0) {
-//            val matrix = Matrix()
-//            matrix.postRotate(rotation.toFloat())
-//            croppedImage = Bitmap.createBitmap(image, 0, 0, image.width, image.height, matrix, true)
-//        }
-        return if (boundingBox.top >= 0 && boundingBox.bottom <= image.width && boundingBox.top + boundingBox.height() <= image.height && boundingBox.left >= 0 && boundingBox.left + boundingBox.width() <= image.width) {
-            Bitmap.createBitmap(
-                image,
-                boundingBox.left,
-                boundingBox.top + shift,
-                boundingBox.width(),
-                boundingBox.height()
-            )
-        } else null
     }
 
     override fun onDestroyView() {

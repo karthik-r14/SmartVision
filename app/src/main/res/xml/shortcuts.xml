@@ -1,0 +1,59 @@
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <capability android:name="actions.intent.GET_THING">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetClass="com.mobileassistant.smartvision.splash_screen.SplashActivity"
+            android:targetPackage="com.mobileassistant.smartvision">
+            <parameter
+                android:name="thing.name"
+                android:key="q" />
+        </intent>
+    </capability>
+
+    <shortcut
+        android:shortcutId="reading_mode"
+        android:shortcutShortLabel="@string/label_reading_mode"
+        android:enabled="false">
+        <capability-binding
+            android:key="actions.intent.OPEN_APP_FEATURE">
+            <parameter-binding
+                android:key="feature"
+                android:value="@array/reading_mode_synonyms" />
+        </capability-binding>
+    </shortcut>
+
+    <shortcut
+        android:shortcutId="detect_objects_mode"
+        android:shortcutShortLabel="@string/label_detect_objects"
+        android:enabled="false">
+        <capability-binding
+            android:key="actions.intent.OPEN_APP_FEATURE">
+            <parameter-binding
+                android:key="feature"
+                android:value="@array/detect_object_mode_synonyms" />
+        </capability-binding>
+    </shortcut>
+
+    <shortcut
+        android:shortcutId="detect_faces_mode"
+        android:shortcutShortLabel="@string/label_detect_faces"
+        android:enabled="false">
+        <capability-binding
+            android:key="actions.intent.OPEN_APP_FEATURE">
+            <parameter-binding
+                android:key="feature"
+                android:value="@array/detect_face_mode_synonyms" />
+        </capability-binding>
+    </shortcut>
+
+    <capability android:name="actions.intent.OPEN_APP_FEATURE">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetClass="com.mobileassistant.smartvision.MainActivity"
+            android:targetPackage="com.mobileassistant.smartvision">
+            <parameter
+                android:name="feature"
+                android:key="feature" />
+        </intent>
+    </capability>
+</shortcuts>

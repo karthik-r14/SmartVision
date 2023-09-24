@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="reading_mode_synonyms">
+        <item>Reading Mode</item>
+        <item>Reading</item>
+        <item>Text Recognition Mode</item>
+        <item>Text Recognition</item>
+    </string-array>
+
+    <string-array name="detect_object_mode_synonyms">
+        <item>Detect Objects Mode</item>
+        <item>Detect Objects</item>
+        <item>Detect Obstacle Mode</item>
+        <item>Detect Obstacle</item>
+        <item>Obstacle Mode</item>
+    </string-array>
+
+    <string-array name="detect_face_mode_synonyms">
+        <item>Detect Faces mode</item>
+        <item>Detect Faces</item>
+        <item>Recognize Faces mode</item>
+        <item>Recognize Faces</item>
+    </string-array>
+</resources>

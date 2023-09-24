@@ -55,4 +55,7 @@
     <string name="cancel_text">Cancel</string>
     <string name="dialog_title_msg">Are you sure you want to delete face %1$s. </string>
     <string name="note_msg">Note : Only Face name can be edited.FaceImage cannot be edited(Please delete this face and add a new one to add a new face image.)</string>
+    <string name="label_reading_mode">Reading mode</string>
+    <string name="label_detect_objects">Detect Objects</string>
+    <string name="label_detect_faces">Detect Faces</string>
 </resources>

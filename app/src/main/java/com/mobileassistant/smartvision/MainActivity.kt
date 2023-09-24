@@ -1,9 +1,11 @@
 package com.mobileassistant.smartvision
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import androidx.appcompat.app.AppCompatActivity
 import androidx.drawerlayout.widget.DrawerLayout
+import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
@@ -16,6 +18,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
+    private lateinit var navController: NavController
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,7 +34,7 @@ class MainActivity : AppCompatActivity() {
 //        }
         val drawerLayout: DrawerLayout = binding.drawerLayout
         val navView: NavigationView = binding.navView
-        val navController = findNavController(R.id.nav_host_fragment_content_main)
+        navController = findNavController(R.id.nav_host_fragment_content_main)
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         appBarConfiguration = AppBarConfiguration(
@@ -41,6 +44,7 @@ class MainActivity : AppCompatActivity() {
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
+        navigateViaIntent(intent)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -54,4 +58,25 @@ class MainActivity : AppCompatActivity() {
         val navController = findNavController(R.id.nav_host_fragment_content_main)
         return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
     }
+
+    private fun navigateViaIntent(intent: Intent) {
+        val bundle: Bundle = intent.extras ?: return
+
+        bundle.keySet().forEach { key ->
+            if (key == "feature") {
+                when (bundle.get(key)) {
+                    "reading_mode" -> navigateToReadingMode()
+                    "detect_objects_mode" -> navigateToSmartCap()
+                    "detect_faces_mode" -> navigateToDetectFaces()
+                }
+            }
+        }
+    }
+
+    private fun navigateToReadingMode() = navController.navigate(R.id.nav_reading_mode)
+
+    private fun navigateToSmartCap() = navController.navigate(R.id.nav_object_detection)
+
+    private fun navigateToDetectFaces() = navController.navigate(R.id.nav_face_detection)
+
 }

@@ -14,6 +14,14 @@ import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.navigation.NavigationView
 import com.mobileassistant.smartvision.databinding.ActivityMainBinding
 
+private const val INTENT_KEY = "feature"
+
+private const val READING_MODE_INTENT_VALUE = "reading_mode"
+
+private const val DETECT_OBJECTS_INTENT_VALUE = "detect_objects_mode"
+
+private const val DETECT_FACES_INTENT_VALUE = "detect_faces_mode"
+
 class MainActivity : AppCompatActivity() {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
@@ -63,11 +71,11 @@ class MainActivity : AppCompatActivity() {
         val bundle: Bundle = intent.extras ?: return
 
         bundle.keySet().forEach { key ->
-            if (key == "feature") {
+            if (key == INTENT_KEY) {
                 when (bundle.get(key)) {
-                    "reading_mode" -> navigateToReadingMode()
-                    "detect_objects_mode" -> navigateToSmartCap()
-                    "detect_faces_mode" -> navigateToDetectFaces()
+                    READING_MODE_INTENT_VALUE -> navigateToReadingMode()
+                    DETECT_OBJECTS_INTENT_VALUE -> navigateToSmartCap()
+                    DETECT_FACES_INTENT_VALUE -> navigateToDetectFaces()
                 }
             }
         }

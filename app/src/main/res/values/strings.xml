@@ -32,7 +32,7 @@
     <string name="minimum_confidence_threshold">4. Minimum Confidence Threshold</string>
     <string name="detect_faces_settings">5. Face detection Settings</string>
     <string name="restore_default_settings">6. Restore Default settings</string>
-    <string name="restore_settings_description">Tap on the button above to reset settings to their original defaults.</string>
+    <string name="restore_settings_description">Tap on the button above to reset settings to their original defaults.\nNote : When Restore defaults settings is pressed Face Detection Settings will be not be reset.You need to manually delete the familiar faces in Face Detection settings.</string>
     <string name="restore_defaults_button_text">Restore defaults</string>
     <string name="feature_not_built">This feature is coming soon.</string>
     <string name="min_confidence_label">Select minimum confidence(in %) above.</string>

@@ -237,6 +237,7 @@ class FaceDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
         faces?.let {
             val boxes: MutableList<BoxWithText> = mutableListOf()
             var faceRecognized: Pair<Boolean, String> = Pair(false, EMPTY)
+            val allAnalyzedFaces: MutableList<Pair<Boolean, String>> = mutableListOf()
             for (face in faces) {
                 val faceNumber = (faces.indexOf(face) + ONE).toString()
                 // now we have a face, so we can use that to analyse
@@ -244,6 +245,7 @@ class FaceDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
 
                 croppedFaceBitmap?.let {
                     faceRecognized = analyzeCroppedFace(croppedFaceBitmap)
+                    allAnalyzedFaces.add(faceRecognized)
                 }
                 val boxWithText = BoxWithText(faceNumber, face.boundingBox, faceRecognized)
                 boxes.add(boxWithText)
@@ -253,22 +255,28 @@ class FaceDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
 
             context?.let {
                 val faceDetectedText = if (faces.size == ONE) {
-                    if (faceRecognized.first == true) {
-                        getString(R.string.one_face_detected_text) + " Face Found : " + faceRecognized.second
+                    if (allAnalyzedFaces.isNotEmpty()) {
+                        if (allAnalyzedFaces[0].first == true) {
+                            getString(R.string.one_face_detected_text) + " Face Found : " + allAnalyzedFaces[0].second
+                        } else {
+                            getString(R.string.one_face_detected_text)
+                        }
                     } else {
                         getString(R.string.one_face_detected_text)
                     }
                 } else {
-                    if (faceRecognized.first == true) {
-                        String.format(
-                            getString(R.string.more_than_one_face_detected_text), faces.size
-                        ) + " Face Found : " + faceRecognized.second
-                    } else {
-                        String.format(
-                            getString(R.string.more_than_one_face_detected_text), faces.size
-                        )
+                    val allFoundFaces =
+                        allAnalyzedFaces.filter { recognizedFace -> recognizedFace.first == true }
+
+                    var faceFoundString = ""
+                    allFoundFaces.forEach { foundFace ->
+                        faceFoundString += "\n Face Found : " + foundFace.second
                     }
+                    String.format(
+                        getString(R.string.more_than_one_face_detected_text), faces.size
+                    ) + faceFoundString
                 }
+
                 camTextView.text = faceDetectedText
                 announceTextToUserIfEnabled(faceDetectedText)
             }

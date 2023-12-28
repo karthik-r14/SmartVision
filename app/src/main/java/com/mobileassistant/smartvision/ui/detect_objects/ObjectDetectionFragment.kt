@@ -27,6 +27,8 @@ import android.widget.Toast.LENGTH_SHORT
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import com.google.ai.client.generativeai.GenerativeModel
+import com.google.ai.client.generativeai.type.content
 import com.google.mlkit.common.model.LocalModel
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.label.ImageLabeling
@@ -59,15 +61,19 @@ import java.util.Locale
 
 
 private const val NO_OBJECT_DETECTED_TEXT = "No Object is Detected"
-private val modeListArray = arrayOf("Mode-1 Detect Objects", "Mode-2 Track Objects")
+private val modeListArray =
+    arrayOf("Mode-1 Detect Objects", "Mode-2 Track Objects", "Mode-3 Gemini AI Tracking")
 private const val MODE_CHANGED_TEXT = "Mode Changed"
 
 
-private const val MODE_DETECT_OBJECTS_POS = 0
-private const val MODE_TRACK_OBJECTS_POS = 1
+const val MODE_DETECT_OBJECTS_POS = 0
+const val MODE_TRACK_OBJECTS_POS = 1
+const val MODE_GEMINI_AI_TRACK_POS = 2
 const val PROCESSING_DELAY_IN_MILLI_SECONDS = 1000L
 const val TIMEOUT_VALUE_IN_MILLISECONDS = 5000
 const val TEXT_TO_BE_TRIMMED = "http:// /jpg"
+
+private const val GEMINI_PRO_VISION_MODEL = "gemini-pro-vision"
 
 class ObjectDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
 
@@ -152,13 +158,30 @@ class ObjectDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
                                 postConnectionToastShown = true
                             }
 
-                            if (modeSelected == MODE_DETECT_OBJECTS_POS) {
-                                detectAndLabelObjectsOnImage(downloadedImage)
-                            } else {
-                                detectAndTrackObjectsOnImage(downloadedImage)
+                            when (modeSelected) {
+                                MODE_DETECT_OBJECTS_POS -> {
+                                    detectAndLabelObjectsOnImage(
+                                        downloadedImage
+                                    )
+                                    delay(PROCESSING_DELAY_IN_MILLI_SECONDS)
+                                }
+
+                                MODE_TRACK_OBJECTS_POS -> {
+                                    detectAndTrackObjectsOnImage(
+                                        downloadedImage
+                                    )
+                                    delay(PROCESSING_DELAY_IN_MILLI_SECONDS)
+                                }
+
+                                MODE_GEMINI_AI_TRACK_POS -> {
+                                    withContext(IO) {
+                                        detectAndDescribeImageUsingGeminiAI(downloadedImage)
+                                    }
+                                }
+
+                                else -> Unit
                             }
                         }
-                        delay(PROCESSING_DELAY_IN_MILLI_SECONDS)
                     }
                 }
             } else {
@@ -179,10 +202,8 @@ class ObjectDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
             sharedPreferences?.getBoolean(ANNOUNCEMENT_STATUS_KEY, false) == true
         binding.announcementToggleButton.isChecked = isAnnouncementEnabled
 
-        modeSelected = if (sharedPreferences?.getBoolean(
-                OBJECT_DETECTION_MODE_KEY, true
-            ) == true
-        ) MODE_DETECT_OBJECTS_POS else MODE_TRACK_OBJECTS_POS
+        modeSelected = sharedPreferences?.getInt(
+            OBJECT_DETECTION_MODE_KEY, MODE_DETECT_OBJECTS_POS)!!
 
         camServerUrl =
             sharedPreferences?.getString(CAM_SERVER_URL_KEY, getString(R.string.image_url))
@@ -302,6 +323,33 @@ class ObjectDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
         }
     }
 
+    private suspend fun detectAndDescribeImageUsingGeminiAI(imageBitmap: Bitmap?) {
+
+        val generativeModel = GenerativeModel(
+            // Use a model that's applicable for your use case (see "Implement basic use cases" below)
+            modelName = GEMINI_PRO_VISION_MODEL,
+            // Access your API key as a Build Configuration variable (see "Set up your API key" above)
+            apiKey = "Enter your api key."
+        )
+
+        imageBitmap?.let {
+            try {
+                val inputContent = content {
+                    image(imageBitmap)
+                    text("Describe the image.Also, what is the distance of the objects in the image from camera.")
+                }
+
+                val answerText = generativeModel.generateContent(inputContent)
+                withContext(Main) {
+                    camImageView.setImageBitmap(imageBitmap)
+                    camTextView.text = answerText.text
+                    answerText.text?.let { text -> announceTextToUserIfEnabled(textContent = text) }
+                }
+            } catch (ex: Exception) {
+                Log.e("Caught Exception", ex.toString())
+            }
+        }
+    }
 
     override fun onDestroyView() {
         super.onDestroyView()

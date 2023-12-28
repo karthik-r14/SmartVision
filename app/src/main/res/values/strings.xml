@@ -26,6 +26,7 @@
     <string name="cam_server_url_label">Cam server Url</string>
     <string name="mode_1_detect_object">Mode 1 - Detect Objects</string>
     <string name="mode_2_track_objects">Mode 2 - Track Objects</string>
+    <string name="mode_3_track_objects">Mode 3 - Detect objects using Gemini</string>
     <string name="announcement_status">1. Announcement Status</string>
     <string name="smart_cap_settings">2. Smart Cap Camera Settings</string>
     <string name="object_detection_mode_settings">3. Object Detection Mode Settings</string>

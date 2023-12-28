@@ -118,6 +118,13 @@
                     android:layout_height="wrap_content"
                     android:text="@string/mode_2_track_objects"
                     android:textStyle="bold" />
+
+                <RadioButton
+                    android:id="@+id/detectObjectsUsingGeminiRadioBtn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/mode_3_track_objects"
+                    android:textStyle="bold" />
             </RadioGroup>
         </LinearLayout>
 

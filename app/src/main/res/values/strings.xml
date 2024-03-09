@@ -23,6 +23,8 @@
     <string name="access_point_mode">Access Point Mode</string>
     <string name="common_network_mode">Common Network Mode</string>
     <string name="smart_cap_server_url_hint_text">Enter the cam server url.</string>
+    <string name="prompt_hint_text">Enter the prompt text for using gemini.</string>
+    <string name="default_prompt_text">"Describe the image and list items present in the image.</string>
     <string name="cam_server_url_label">Cam server Url</string>
     <string name="mode_1_detect_object">Mode 1 - Detect Objects</string>
     <string name="mode_2_track_objects">Mode 2 - Track Objects</string>
@@ -30,6 +32,7 @@
     <string name="announcement_status">1. Announcement Status</string>
     <string name="smart_cap_settings">2. Smart Cap Camera Settings</string>
     <string name="object_detection_mode_settings">3. Object Detection Mode Settings</string>
+    <string name="prompt_text">Prompt text</string>
     <string name="minimum_confidence_threshold">4. Minimum Confidence Threshold</string>
     <string name="detect_faces_settings">5. Face detection Settings</string>
     <string name="restore_default_settings">6. Restore Default settings</string>

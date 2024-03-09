@@ -126,6 +126,30 @@
                     android:text="@string/mode_3_track_objects"
                     android:textStyle="bold" />
             </RadioGroup>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/prompt_text"
+                    android:textColor="@color/black"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <EditText
+                    android:id="@+id/promptEditText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/spacing2x"
+                    android:hint="@string/prompt_hint_text"
+                    android:inputType="textUri" />
+            </LinearLayout>
+
         </LinearLayout>
 
         <LinearLayout

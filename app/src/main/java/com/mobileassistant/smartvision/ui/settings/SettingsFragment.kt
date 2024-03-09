@@ -28,6 +28,7 @@ const val SMART_VISION_PREFERENCES = "smart_vision_pref"
 const val ANNOUNCEMENT_STATUS_KEY = "announcement_status_key"
 const val CAM_SERVER_URL_KEY = "cam_server_url_key"
 const val OBJECT_DETECTION_MODE_KEY = "object_detection_mode_key"
+const val PROMPT_TEXT_KEY = "prompt_text_key"
 const val MIN_CONFIDENCE_THRESHOLD_KEY = "min_confidence_threshold_key"
 val minConfidenceThresholdArray = arrayOf("50", "60", "70", "80", "90")
 const val DEFAULT_CONFIDENCE_POSITION = 2
@@ -39,6 +40,7 @@ class SettingsFragment : Fragment() {
     private var _binding: FragmentSettingsBinding? = null
     private var announcementSwitch: SwitchMaterial? = null
     private var camServerUrlEditText: EditText? = null
+    private var promptEditText: EditText? = null
     private var objectDetectionModeRadioGroup: RadioGroup? = null
     private var detectObjectsRadioBtn: RadioButton? = null
     private var trackObjectsRadioBtn: RadioButton? = null
@@ -64,6 +66,7 @@ class SettingsFragment : Fragment() {
         trackObjectsRadioBtn = binding.trackObjectsRadioBtn
         detectObjectsUsingGeminiRadioBtn = binding.detectObjectsUsingGeminiRadioBtn
         camServerUrlEditText = binding.camServerUrlEditText
+        promptEditText = binding.promptEditText
         confidenceSelectionSpinner = binding.confidenceSelectionSpinner
         restoreDefaultButton = binding.restoreDefaultBtn
         gotoFaceSettingsButton = binding.goToFaceSettingsButton
@@ -83,10 +86,16 @@ class SettingsFragment : Fragment() {
             sharedPreferences?.getString(CAM_SERVER_URL_KEY, getString(R.string.image_url))
         camServerUrlEditText?.setText(camServerUrl)
 
-        val objectDetectionMode = sharedPreferences?.getInt(OBJECT_DETECTION_MODE_KEY, MODE_DETECT_OBJECTS_POS)
+        val objectDetectionMode =
+            sharedPreferences?.getInt(OBJECT_DETECTION_MODE_KEY, MODE_DETECT_OBJECTS_POS)
         detectObjectsRadioBtn?.isChecked = objectDetectionMode == MODE_DETECT_OBJECTS_POS
         trackObjectsRadioBtn?.isChecked = objectDetectionMode == MODE_TRACK_OBJECTS_POS
-        detectObjectsUsingGeminiRadioBtn?.isChecked = objectDetectionMode == MODE_GEMINI_AI_TRACK_POS
+        detectObjectsUsingGeminiRadioBtn?.isChecked =
+            objectDetectionMode == MODE_GEMINI_AI_TRACK_POS
+
+        val promptText =
+            sharedPreferences?.getString(PROMPT_TEXT_KEY, getString(R.string.default_prompt_text))
+        promptEditText?.setText(promptText)
 
         val minThresholdConfidencePosition = sharedPreferences?.getInt(
             MIN_CONFIDENCE_THRESHOLD_KEY, DEFAULT_CONFIDENCE_POSITION
@@ -133,6 +142,11 @@ class SettingsFragment : Fragment() {
             prefEditor?.apply()
         }
 
+        promptEditText?.doAfterTextChanged {
+            prefEditor?.putString(PROMPT_TEXT_KEY, promptEditText?.text.toString())
+            prefEditor?.apply()
+        }
+
         objectDetectionModeRadioGroup?.setOnCheckedChangeListener { _, checkedId ->
             when (checkedId) {
                 R.id.detectObjectsRadioBtn -> prefEditor?.putInt(
@@ -169,6 +183,10 @@ class SettingsFragment : Fragment() {
             prefEditor?.putInt(
                 OBJECT_DETECTION_MODE_KEY, MODE_DETECT_OBJECTS_POS
             )
+
+            //reset prompt text
+            promptEditText?.setText(getString(R.string.default_prompt_text))
+            prefEditor?.putString(PROMPT_TEXT_KEY, getString(R.string.default_prompt_text))
 
             // reset min confidence threshold
             confidenceSelectionSpinner?.setSelection(DEFAULT_CONFIDENCE_POSITION)

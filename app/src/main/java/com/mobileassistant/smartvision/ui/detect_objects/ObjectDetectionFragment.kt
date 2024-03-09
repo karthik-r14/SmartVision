@@ -45,6 +45,7 @@ import com.mobileassistant.smartvision.ui.settings.CAM_SERVER_URL_KEY
 import com.mobileassistant.smartvision.ui.settings.DEFAULT_CONFIDENCE_POSITION
 import com.mobileassistant.smartvision.ui.settings.MIN_CONFIDENCE_THRESHOLD_KEY
 import com.mobileassistant.smartvision.ui.settings.OBJECT_DETECTION_MODE_KEY
+import com.mobileassistant.smartvision.ui.settings.PROMPT_TEXT_KEY
 import com.mobileassistant.smartvision.ui.settings.SMART_VISION_PREFERENCES
 import com.mobileassistant.smartvision.ui.settings.minConfidenceThresholdArray
 import kotlinx.coroutines.Dispatchers.IO
@@ -88,6 +89,7 @@ class ObjectDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
     private var isAnnouncementEnabled: Boolean = false
     private var modeSelected = -1
     private lateinit var camServerUrl: String
+    private lateinit var promptText: String
     private var minConfidenceThreshold: Float = 0.0f
 
     // This property is only valid between onCreateView and
@@ -203,10 +205,14 @@ class ObjectDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
         binding.announcementToggleButton.isChecked = isAnnouncementEnabled
 
         modeSelected = sharedPreferences?.getInt(
-            OBJECT_DETECTION_MODE_KEY, MODE_DETECT_OBJECTS_POS)!!
+            OBJECT_DETECTION_MODE_KEY, MODE_DETECT_OBJECTS_POS
+        )!!
 
         camServerUrl =
             sharedPreferences?.getString(CAM_SERVER_URL_KEY, getString(R.string.image_url))
+                .toString()
+        promptText =
+            sharedPreferences?.getString(PROMPT_TEXT_KEY, getString(R.string.default_prompt_text))
                 .toString()
     }
 
@@ -329,21 +335,24 @@ class ObjectDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
             // Use a model that's applicable for your use case (see "Implement basic use cases" below)
             modelName = GEMINI_PRO_VISION_MODEL,
             // Access your API key as a Build Configuration variable (see "Set up your API key" above)
-            apiKey = "Enter your api key."
+            apiKey = GEMINI_AI_API_KEY
         )
 
         imageBitmap?.let {
             try {
                 val inputContent = content {
                     image(imageBitmap)
-                    text("Describe the image.Also, what is the distance of the objects in the image from camera.")
+                    text(promptText)
                 }
 
-                val answerText = generativeModel.generateContent(inputContent)
+                var answerText = ""
+                generativeModel.generateContentStream(inputContent).collect { chunk ->
+                    answerText += chunk.text
+                }
                 withContext(Main) {
                     camImageView.setImageBitmap(imageBitmap)
-                    camTextView.text = answerText.text
-                    answerText.text?.let { text -> announceTextToUserIfEnabled(textContent = text) }
+                    camTextView.text = answerText
+                    announceTextToUserIfEnabled(textContent = answerText)
                 }
             } catch (ex: Exception) {
                 Log.e("Caught Exception", ex.toString())

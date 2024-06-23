@@ -42,7 +42,7 @@
     <string name="min_confidence_label">Select minimum confidence(in %) above.</string>
     <string name="error_text_description">You are not connected to Smart Cap.Please connect to it and try again.</string>
     <string name="about_us_content">This app is for visually Impaired/Challenged.\n\nThere are 4 features of this app namely
-        \n\n1. Reading mode - Use this option to recognize text by placing the phone\'s camera over a sheet containing text.\n\n2. Detect Object - Use this feature to detect objects using the camera module on the smart cap.\n\n3. Detect Faces - Use this feature to detect faces and recognize familiar faces using the camera module on the smart cap.\n\n4. Scan Code - This feature is coming soon.</string>
+        \n\n1. Reading mode - Use this option to recognize text by placing the phone\'s camera over a sheet containing text.\n\n2. Detect Object - Use this feature to detect objects using the camera module on the smart cap.\n\n3. Detect Faces - Use this feature to detect faces and recognize familiar faces using the camera module on the smart cap.\n\n4. Scan Code - Use this feature to get details of a product(like its Cost, Expiry date, Mfg date etc.) by scanning the QR-code or Barcode available on it.</string>
     <string name="attempting_to_connect_msg">Attempting to connect to Smart cap....</string>
     <string name="connection_successful_msg">Connection to Smart cap is Successful.</string>
     <string name="more_than_one_face_detected_text">There are %1$s faces detected.</string>

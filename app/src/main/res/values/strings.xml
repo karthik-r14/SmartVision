@@ -62,4 +62,5 @@
     <string name="label_reading_mode">Reading mode</string>
     <string name="label_detect_objects">Detect Objects</string>
     <string name="label_detect_faces">Detect Faces</string>
+    <string name="menu_item_5">Summarize Docs</string>
 </resources>

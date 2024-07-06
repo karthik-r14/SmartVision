@@ -4,8 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
-import android.widget.Toast.LENGTH_LONG
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
@@ -54,6 +52,10 @@ class HomeFragment : Fragment() {
                     getString(R.string.menu_item_4),
                     R.drawable.barcode_code_scanner,
                     ::navigateToBarcodeScanner
+                ), MenuItem(
+                    getString(R.string.menu_item_5),
+                    R.drawable.summarize_document,
+                    ::navigateToSummarizeDocs
                 )
             )
             val adapter = DashboardAdapter(context, items)
@@ -62,10 +64,14 @@ class HomeFragment : Fragment() {
     }
 
     private fun navigateToReadingMode() = findNavController().navigate(R.id.nav_reading_mode)
+
     private fun navigateToSmartCap() = findNavController().navigate(R.id.nav_object_detection)
 
     private fun navigateToDetectFaces() = findNavController().navigate(R.id.nav_face_detection)
+
     private fun navigateToBarcodeScanner() = findNavController().navigate(R.id.nav_scan_code)
+
+    private fun navigateToSummarizeDocs() = findNavController().navigate(R.id.nav_summarize_doc)
 
     override fun onDestroyView() {
         super.onDestroyView()

@@ -8,14 +8,15 @@
 
     <ImageView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:src="@drawable/dashboard_icon"
-        android:layout_gravity="center_horizontal"/>
+        android:layout_height="180dp"
+        android:layout_gravity="center_horizontal"
+        android:importantForAccessibility="no"
+        android:src="@drawable/dashboard_icon" />
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/spacing2x"
+        android:layout_marginTop="@dimen/spacing1x"
         android:gravity="center"
         android:text="@string/dashboard_text"
         android:textColor="@color/black"
@@ -26,7 +27,7 @@
         android:id="@+id/recyclerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="@dimen/spacing5x"
+        android:layout_marginTop="@dimen/spacing2x"
         android:paddingStart="@dimen/spacing2x"
         android:paddingEnd="@dimen/spacing2x"
         android:scrollbars="vertical"

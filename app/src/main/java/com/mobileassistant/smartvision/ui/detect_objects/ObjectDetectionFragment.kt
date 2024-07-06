@@ -74,7 +74,8 @@ const val PROCESSING_DELAY_IN_MILLI_SECONDS = 1000L
 const val TIMEOUT_VALUE_IN_MILLISECONDS = 5000
 const val TEXT_TO_BE_TRIMMED = "http:// /jpg"
 
-private const val GEMINI_PRO_VISION_MODEL = "gemini-pro-vision"
+private const val GEMINI_MODEL = "gemini-1.5-flash"
+private const val GEMINI_AI_API_KEY = ""
 
 class ObjectDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
 
@@ -333,7 +334,7 @@ class ObjectDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
 
         val generativeModel = GenerativeModel(
             // Use a model that's applicable for your use case (see "Implement basic use cases" below)
-            modelName = GEMINI_PRO_VISION_MODEL,
+            modelName = GEMINI_MODEL,
             // Access your API key as a Build Configuration variable (see "Set up your API key" above)
             apiKey = GEMINI_AI_API_KEY
         )

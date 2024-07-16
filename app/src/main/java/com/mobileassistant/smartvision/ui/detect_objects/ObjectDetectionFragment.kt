@@ -341,8 +341,9 @@ class ObjectDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
 
         imageBitmap?.let {
             try {
+                val resizedImageBitmap = resizeImage(imageBitmap)
                 val inputContent = content {
-                    image(imageBitmap)
+                    image(resizedImageBitmap)
                     text(promptText)
                 }
 
@@ -351,7 +352,7 @@ class ObjectDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
                     answerText += chunk.text
                 }
                 withContext(Main) {
-                    camImageView.setImageBitmap(imageBitmap)
+                    camImageView.setImageBitmap(resizedImageBitmap)
                     camTextView.text = answerText
                     announceTextToUserIfEnabled(textContent = answerText)
                 }
@@ -436,5 +437,18 @@ class ObjectDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
         errorLayout.isVisible = true
         camImageView.isVisible = false
         detailItemLayout.isVisible = false
+    }
+
+    private fun resizeImage(image: Bitmap): Bitmap {
+
+        val width = image.width
+        val height = image.height
+
+        val scaleWidth = width / 5
+        val scaleHeight = height / 5
+
+        if (image.byteCount <= 1000000) return image
+
+        return Bitmap.createScaledBitmap(image, scaleWidth, scaleHeight, false)
     }
 }

@@ -9,12 +9,21 @@
     <ImageView
         android:id="@+id/cam_image_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:scaleType="fitXY"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_height="0dp"
+        android:layout_marginHorizontal="@dimen/spacing2x"
+        android:layout_marginTop="@dimen/spacing2x"
+        android:scaleType="centerCrop"
+        app:layout_constraintBottom_toBottomOf="@id/guideline_one"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline_one"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.7" />
 
     <LinearLayout
         android:id="@+id/detected_item_layout"
@@ -31,7 +40,7 @@
             android:id="@+id/cam_detected_label"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="@dimen/spacing1x"
+            android:layout_marginHorizontal="@dimen/spacing2x"
             android:textColor="@color/black"
             android:textSize="20sp" />
 
@@ -73,8 +82,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:visibility="gone"
         android:paddingHorizontal="@dimen/spacing2x"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

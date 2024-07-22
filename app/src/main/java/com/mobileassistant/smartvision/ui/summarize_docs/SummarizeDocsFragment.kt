@@ -241,19 +241,21 @@ class SummarizeDocsFragment : Fragment(), TextToSpeech.OnInitListener {
     }
 
     private fun announceTextToUserIfEnabled() {
-        if (announcementEnabledStatus == true) {
-            textToSpeech?.let {
-                val titleString =
-                    ACTIVATED_STATUS_TEXT + getString(R.string.document_summarized_msg)
-                it.speak(titleString, TextToSpeech.QUEUE_ADD, null, "")
-                Thread.sleep(FIVE_THOUSAND_MILLI_SECONDS)
-                beep()
-                it.speak(
-                    extractedTextView.text.toString(), TextToSpeech.QUEUE_ADD, null, ""
-                )
+        lifecycleScope.launch(IO) {
+            if (announcementEnabledStatus == true) {
+                textToSpeech?.let {
+                    val titleString =
+                        ACTIVATED_STATUS_TEXT + getString(R.string.document_summarized_msg)
+                    it.speak(titleString, TextToSpeech.QUEUE_ADD, null, "")
+                    Thread.sleep(FIVE_THOUSAND_MILLI_SECONDS)
+                    beep()
+                    it.speak(
+                        extractedTextView.text.toString(), TextToSpeech.QUEUE_ADD, null, ""
+                    )
+                }
+            } else {
+                textToSpeech?.speak(DEACTIVATED_STATUS_TEXT, TextToSpeech.QUEUE_FLUSH, null, "")
             }
-        } else {
-            textToSpeech?.speak(DEACTIVATED_STATUS_TEXT, TextToSpeech.QUEUE_FLUSH, null, "")
         }
     }
 

@@ -35,6 +35,7 @@ import com.google.mlkit.vision.label.ImageLabeling
 import com.google.mlkit.vision.label.defaults.ImageLabelerOptions
 import com.google.mlkit.vision.objects.ObjectDetection
 import com.google.mlkit.vision.objects.custom.CustomObjectDetectorOptions
+import com.mobileassistant.smartvision.BuildConfig
 import com.mobileassistant.smartvision.R
 import com.mobileassistant.smartvision.databinding.FragmentObjectDetectionBinding
 import com.mobileassistant.smartvision.mlkit.objectdetector.BoxWithText
@@ -75,7 +76,7 @@ const val TIMEOUT_VALUE_IN_MILLISECONDS = 5000
 const val TEXT_TO_BE_TRIMMED = "http:// /jpg"
 
 private const val GEMINI_MODEL_FLASH = "gemini-1.5-flash"
-const val GEMINI_AI_API_KEY = ""
+const val GEMINI_AI_API_KEY = BuildConfig.apiKey
 
 class ObjectDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
 

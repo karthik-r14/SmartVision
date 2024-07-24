@@ -27,6 +27,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.google.ai.client.generativeai.GenerativeModel
@@ -108,12 +109,24 @@ class SummarizeDocsFragment : Fragment(), TextToSpeech.OnInitListener {
         }
 
         selectPdfButton.setOnClickListener {
-            if (context?.isConnected == true && promptEditText.text.trim().isNotEmpty()) {
+            if (context?.isConnected == true) {
                 onSelectPdfClick()
             } else {
                 Toast.makeText(
                     context, getString(R.string.internet_not_working_msg), Toast.LENGTH_SHORT
                 ).show()
+            }
+        }
+
+        promptEditText.doOnTextChanged { text, _, _, _ ->
+            if (text.toString().trim().isEmpty()) {
+                with(promptEditText) {
+                    error = getString(R.string.prompt_text_empty_msg)
+                    requestFocus()
+                }
+                selectPdfButton.isEnabled = false
+            } else {
+                selectPdfButton.isEnabled = true
             }
         }
 

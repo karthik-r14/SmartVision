@@ -441,7 +441,6 @@ class ObjectDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
     }
 
     private fun resizeImage(image: Bitmap): Bitmap {
-
         val width = image.width
         val height = image.height
 

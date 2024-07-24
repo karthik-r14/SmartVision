@@ -41,8 +41,7 @@
     <string name="feature_not_built">This feature is coming soon.</string>
     <string name="min_confidence_label">Select minimum confidence(in %) above.</string>
     <string name="error_text_description">You are not connected to Smart Cap.Please connect to it and try again.</string>
-    <string name="about_us_content">This app is for visually Impaired/Challenged.\n\nThere are 4 features of this app namely
-        \n\n1. Reading mode - Use this option to recognize text by placing the phone\'s camera over a sheet containing text.\n\n2. Detect Object - Use this feature to detect objects using the camera module on the smart cap.\n\n3. Detect Faces - Use this feature to detect faces and recognize familiar faces using the camera module on the smart cap.\n\n4. Scan Code - Use this feature to get details of a product(like its Cost, Expiry date, Mfg date etc.) by scanning the QR-code or Barcode available on it.</string>
+    <string name="about_us_content">This app is for visually Impaired/Challenged individuals.There are 5 features in this app namely.</string>
     <string name="attempting_to_connect_msg">Attempting to connect to Smart cap....</string>
     <string name="connection_successful_msg">Connection to Smart cap is Successful.</string>
     <string name="more_than_one_face_detected_text">There are %1$s faces detected.</string>
@@ -67,6 +66,7 @@
     <string name="permission_denied">Permission Denied</string>
     <string name="error_extracting_the_file">There is an error while extracting the file : \n%1$s</string>
     <string name="internet_not_working_msg">Please check your internet connection and try again</string>
+    <string name="prompt_text_empty_msg">The prompt text should not be empty. Please enter a prompt text or use the default prompt text.</string>
     <string name="default_document_prompt_text">Summarize the following text content in 150words.</string>
     <string name="hint_document_prompt_text">Enter prompt text to summarize the document.</string>
     <string name="step_one_text">Step 1. Set prompt text below to summarize your pdf document.</string>
@@ -74,4 +74,11 @@
     <string name="document_summary">Document Summary</string>
     <string name="language_not_supported">The Language is not supported.</string>
     <string name="document_summarized_msg">Document summary has been generated and it will be announced after a beep.</string>
+    <string-array name="feature_description">
+        <item>1. Reading mode - Use this option to recognize text by placing the phone\'s camera over a sheet containing text.</item>
+        <item>2. Detect Objects - Use this feature to detect objects using the camera module on the smart cap.</item>
+        <item>3. Detect Faces - Use this feature to detect faces and recognize familiar faces using the camera module on the smart cap.</item>
+        <item>4. Scan Code - Use this feature to get details of a product(like its Cost, Expiry date, Mfg date etc.) by scanning the QR-code or Barcode available on it.</item>
+        <item>5. Summarize Docs - Use this feature to summarize pdf documents.</item>
+    </string-array>
 </resources>

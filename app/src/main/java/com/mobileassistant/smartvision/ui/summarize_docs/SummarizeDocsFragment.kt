@@ -15,6 +15,8 @@ import android.speech.tts.TextToSpeech
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
@@ -107,7 +109,7 @@ class SummarizeDocsFragment : Fragment(), TextToSpeech.OnInitListener {
             val data: Intent? = result?.data
             data?.let {
                 val uri = data.data
-                progressBar.visibility = View.VISIBLE
+                progressBar.visibility = VISIBLE
                 extractPDF(uri)
             }
         }
@@ -140,8 +142,9 @@ class SummarizeDocsFragment : Fragment(), TextToSpeech.OnInitListener {
         }
 
         summarizeAnotherDocButton.setOnClickListener {
-            allStepsLayout.visibility = View.VISIBLE
-            documentSummaryLayout.visibility = View.GONE
+            allStepsLayout.visibility = VISIBLE
+            documentSummaryLayout.visibility = GONE
+            announcementLayout.visibility = GONE
         }
         return root
     }
@@ -214,7 +217,7 @@ class SummarizeDocsFragment : Fragment(), TextToSpeech.OnInitListener {
             reader.close()
         } catch (e: Exception) {
             extractedTextView.text = getString(R.string.error_extracting_the_file, e)
-            progressBar.visibility = View.GONE
+            progressBar.visibility = GONE
         }
     }
 
@@ -231,11 +234,11 @@ class SummarizeDocsFragment : Fragment(), TextToSpeech.OnInitListener {
 
             val generateContent = generativeModel.generateContent(inputContent)
             withContext(Dispatchers.Main) {
-                progressBar.visibility = View.GONE
+                progressBar.visibility = GONE
                 extractedTextView.text = generateContent.text
-                allStepsLayout.visibility = View.GONE
-                documentSummaryLayout.visibility = View.VISIBLE
-                announcementLayout.visibility = View.VISIBLE
+                allStepsLayout.visibility = GONE
+                documentSummaryLayout.visibility = VISIBLE
+                announcementLayout.visibility = VISIBLE
                 announceTextToUserIfEnabled()
             }
         }

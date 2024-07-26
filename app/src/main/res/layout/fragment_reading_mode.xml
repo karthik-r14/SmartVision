@@ -6,50 +6,64 @@
     android:layout_height="match_parent"
     tools:context=".ui.reading_mode.ReadingModeFragment">
 
-    <com.mobileassistant.smartvision.mlkit.utils.CameraSourcePreview
-        android:id="@+id/preview_view"
+    <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <com.mobileassistant.smartvision.mlkit.utils.GraphicOverlay
-        android:id="@+id/graphic_overlay"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_margin="@dimen/spacing2x"
+        app:cardCornerRadius="@dimen/spacing2x"
+        app:layout_constraintBottom_toBottomOf="@id/guideline_one"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent">
+
+        <com.mobileassistant.smartvision.mlkit.utils.CameraSourcePreview
+            android:id="@+id/preview_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <com.mobileassistant.smartvision.mlkit.utils.GraphicOverlay
+            android:id="@+id/graphic_overlay"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+    </androidx.cardview.widget.CardView>
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline_one"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.9" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
         android:background="@color/white"
         android:gravity="center_horizontal"
+        android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
+
 
         <TextView
             android:id="@+id/announcementLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
             android:gravity="center"
-            android:textSize="32sp"
             android:text="@string/announcement"
             android:textColor="@color/black"
-            android:layout_gravity="center_vertical"
+            android:textSize="32sp"
             android:textStyle="bold" />
 
         <ToggleButton
             android:id="@+id/announcementToggleButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="end"
             android:layout_marginStart="@dimen/spacing1x"
-            android:layout_marginEnd="@dimen/spacing1x"
-            android:layout_gravity="end"/>
+            android:layout_marginEnd="@dimen/spacing1x" />
 
     </LinearLayout>
 

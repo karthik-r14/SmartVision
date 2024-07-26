@@ -60,9 +60,11 @@ class SummarizeDocsFragment : Fragment(), TextToSpeech.OnInitListener {
     //    private lateinit var viewModel: SummarizeDocsViewModel
     private var _binding: FragmentSummarizeDocsBinding? = null
     private lateinit var selectPdfButton: Button
+    private lateinit var summarizeAnotherDocButton: Button
     private lateinit var extractedTextView: TextView
     private lateinit var promptEditText: EditText
     private lateinit var progressBar: ProgressBar
+    private lateinit var allStepsLayout: LinearLayout
     private lateinit var documentSummaryLayout: LinearLayout
     private lateinit var announcementLayout: LinearLayout
     private lateinit var announcementToggleButton: ToggleButton
@@ -85,9 +87,11 @@ class SummarizeDocsFragment : Fragment(), TextToSpeech.OnInitListener {
         _binding = FragmentSummarizeDocsBinding.inflate(inflater, container, false)
         val root: View = binding.root
         selectPdfButton = binding.selectPdfButton
+        summarizeAnotherDocButton = binding.summarizeAnotherDocButton
         extractedTextView = binding.extractedTextView
         promptEditText = binding.promptEditText
         progressBar = binding.progressBar
+        allStepsLayout = binding.allStepsLayout
         documentSummaryLayout = binding.documentSummaryLayout
         announcementLayout = binding.announcementLayout
         announcementToggleButton = binding.announcementToggleButton
@@ -134,6 +138,11 @@ class SummarizeDocsFragment : Fragment(), TextToSpeech.OnInitListener {
             announcementEnabledStatus = isChecked
             announceTextToUserIfEnabled()
         }
+
+        summarizeAnotherDocButton.setOnClickListener {
+            allStepsLayout.visibility = View.VISIBLE
+            documentSummaryLayout.visibility = View.GONE
+        }
         return root
     }
 
@@ -151,7 +160,7 @@ class SummarizeDocsFragment : Fragment(), TextToSpeech.OnInitListener {
                         REQUEST_CODE_READ_EXTERNAL_STORAGE
                     )
                 } else {
-                    selectPdfFromInternalStorage()
+                    selectPdfFromDeviceStorage()
                 }
             } else {
                 // For Android13 and higher
@@ -165,13 +174,13 @@ class SummarizeDocsFragment : Fragment(), TextToSpeech.OnInitListener {
                         REQUEST_CODE_READ_MEDIA_IMAGES
                     )
                 } else {
-                    selectPdfFromInternalStorage()
+                    selectPdfFromDeviceStorage()
                 }
             }
         }
     }
 
-    private fun selectPdfFromInternalStorage() {
+    private fun selectPdfFromDeviceStorage() {
         val intent = Intent(Intent.ACTION_GET_CONTENT)
         intent.setType(PDF_TYPE)
         resultLauncher?.launch(intent)
@@ -183,7 +192,7 @@ class SummarizeDocsFragment : Fragment(), TextToSpeech.OnInitListener {
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if ((requestCode == REQUEST_CODE_READ_EXTERNAL_STORAGE || requestCode == REQUEST_CODE_READ_MEDIA_IMAGES) && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            selectPdfFromInternalStorage()
+            selectPdfFromDeviceStorage()
         } else {
             Toast.makeText(context, getString(R.string.permission_denied), Toast.LENGTH_SHORT)
                 .show()
@@ -224,6 +233,7 @@ class SummarizeDocsFragment : Fragment(), TextToSpeech.OnInitListener {
             withContext(Dispatchers.Main) {
                 progressBar.visibility = View.GONE
                 extractedTextView.text = generateContent.text
+                allStepsLayout.visibility = View.GONE
                 documentSummaryLayout.visibility = View.VISIBLE
                 announcementLayout.visibility = View.VISIBLE
                 announceTextToUserIfEnabled()

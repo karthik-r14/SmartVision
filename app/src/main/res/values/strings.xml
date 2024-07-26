@@ -69,11 +69,13 @@
     <string name="prompt_text_empty_msg">The prompt text should not be empty. Please enter a prompt text or use the default prompt text.</string>
     <string name="default_document_prompt_text">Summarize the following text content in 150words.</string>
     <string name="hint_document_prompt_text">Enter prompt text to summarize the document.</string>
-    <string name="step_one_text">Step 1. Set prompt text below to summarize your pdf document.</string>
-    <string name="step_two_text">Step 2. Pick a pdf file from your device to summarize it.</string>
+    <string name="step_one_text">1. Set prompt text below to summarize your pdf document.</string>
+    <string name="step_two_text">2. Pick a pdf file from your device to summarize it.</string>
     <string name="document_summary">Document Summary</string>
     <string name="language_not_supported">The Language is not supported.</string>
     <string name="document_summarized_msg">Document summary has been generated and it will be announced after a beep.</string>
+    <string name="steps_to_follow_text">Follow the steps given below to summarize your pdf document.</string>
+    <string name="summarize_another_document">Summarize Another Document</string>
     <string-array name="feature_description">
         <item>1. Reading mode - Use this option to recognize text by placing the phone\'s camera over a sheet containing text.</item>
         <item>2. Detect Objects - Use this feature to detect objects using the camera module on the smart cap.</item>

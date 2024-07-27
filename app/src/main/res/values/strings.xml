@@ -81,6 +81,6 @@
         <item>2. Summarize Docs - Use this feature to summarize pdf documents.</item>
         <item>3. Detect Objects - Use this feature to detect objects using the camera module on the smart cap.</item>
         <item>4. Detect Faces - Use this feature to detect faces and recognize familiar faces using the camera module on the smart cap.</item>
-        <item>5. Scan Code - Use this feature to get details of a product(like its Cost, Expiry date, Mfg date etc.) by scanning the QR-code or Barcode available on it.</item>
+        <item>5. Scan Products - Use this feature to get details of a product(like its Cost, Expiry date, Mfg date etc.) by scanning the QR-code or Barcode available on it.</item>
     </string-array>
 </resources>

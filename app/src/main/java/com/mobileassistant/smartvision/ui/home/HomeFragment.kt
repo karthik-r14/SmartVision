@@ -42,20 +42,20 @@ class HomeFragment : Fragment() {
                     ::navigateToReadingMode
                 ), MenuItem(
                     getString(R.string.menu_item_2),
-                    R.drawable.object_detection_icon,
-                    ::navigateToSmartCap
+                    R.drawable.summarize_document,
+                    ::navigateToSummarizeDocs
                 ), MenuItem(
                     getString(R.string.menu_item_3),
+                    R.drawable.object_detection_icon,
+                    ::navigateToDetectObjects
+                ), MenuItem(
+                    getString(R.string.menu_item_4),
                     R.drawable.face_recognition,
                     ::navigateToDetectFaces
                 ), MenuItem(
-                    getString(R.string.menu_item_4),
+                    getString(R.string.menu_item_5),
                     R.drawable.barcode_code_scanner,
                     ::navigateToBarcodeScanner
-                ), MenuItem(
-                    getString(R.string.menu_item_5),
-                    R.drawable.summarize_document,
-                    ::navigateToSummarizeDocs
                 )
             )
             val adapter = DashboardAdapter(context, items)
@@ -65,7 +65,7 @@ class HomeFragment : Fragment() {
 
     private fun navigateToReadingMode() = findNavController().navigate(R.id.nav_reading_mode)
 
-    private fun navigateToSmartCap() = findNavController().navigate(R.id.nav_object_detection)
+    private fun navigateToDetectObjects() = findNavController().navigate(R.id.nav_object_detection)
 
     private fun navigateToDetectFaces() = findNavController().navigate(R.id.nav_face_detection)
 

@@ -34,5 +34,15 @@
         android:orientation="horizontal"
         app:layout_constraintGuide_percent="0.5" />
 
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/spacing2x"
+        android:text="@string/scan_product_note"
+        android:textColor="@color/black"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/guideline_one" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

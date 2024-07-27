@@ -78,8 +78,10 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/spacing2x"
+                    android:background="@drawable/edit_text_border_normal"
                     android:hint="@string/smart_cap_server_url_hint_text"
-                    android:inputType="textUri" />
+                    android:inputType="textUri"
+                    android:lines="1" />
             </LinearLayout>
 
         </LinearLayout>
@@ -109,6 +111,7 @@
                     android:id="@+id/detectObjectsRadioBtn"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:buttonTint="@color/purple_500"
                     android:text="@string/mode_1_detect_object"
                     android:textStyle="bold" />
 
@@ -116,6 +119,7 @@
                     android:id="@+id/trackObjectsRadioBtn"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:buttonTint="@color/purple_500"
                     android:text="@string/mode_2_track_objects"
                     android:textStyle="bold" />
 
@@ -123,6 +127,7 @@
                     android:id="@+id/detectObjectsUsingGeminiRadioBtn"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:buttonTint="@color/purple_500"
                     android:text="@string/mode_3_track_objects"
                     android:textStyle="bold" />
             </RadioGroup>
@@ -146,8 +151,10 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/spacing2x"
+                    android:background="@drawable/edit_text_border_normal"
                     android:hint="@string/prompt_hint_text"
-                    android:inputType="textUri" />
+                    android:inputType="textMultiLine"
+                    android:lines="2" />
             </LinearLayout>
 
         </LinearLayout>

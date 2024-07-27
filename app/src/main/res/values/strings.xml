@@ -32,7 +32,7 @@
     <string name="announcement_status">1. Announcement Status</string>
     <string name="smart_cap_settings">2. Smart Cap Camera Settings</string>
     <string name="object_detection_mode_settings">3. Object Detection Mode Settings</string>
-    <string name="prompt_text">Prompt text</string>
+    <string name="prompt_text">Prompt text\nfor Mode-3</string>
     <string name="minimum_confidence_threshold">4. Minimum Confidence Threshold</string>
     <string name="detect_faces_settings">5. Face detection Settings</string>
     <string name="restore_default_settings">6. Restore Default settings</string>

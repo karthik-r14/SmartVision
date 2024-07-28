@@ -59,7 +59,6 @@ private const val FIVE_THOUSAND_MILLI_SECONDS = 5000L
 
 class SummarizeDocsFragment : Fragment(), TextToSpeech.OnInitListener {
 
-    //    private lateinit var viewModel: SummarizeDocsViewModel
     private var _binding: FragmentSummarizeDocsBinding? = null
     private lateinit var selectPdfButton: Button
     private lateinit var summarizeAnotherDocButton: Button

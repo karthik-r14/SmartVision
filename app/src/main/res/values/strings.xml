@@ -10,7 +10,7 @@
     <string name="menu_home">Home</string>
     <string name="menu_settings">Settings</string>
     <string name="face_settings">Face Settings</string>
-    <string name="menu_aboutus">About Us</string>
+    <string name="menu_about_features">About Features</string>
     <string name="title_activity_splash">SplashActivity</string>
     <string name="menu_item_1">Reading Mode</string>
     <string name="menu_item_2">Summarize Docs</string>

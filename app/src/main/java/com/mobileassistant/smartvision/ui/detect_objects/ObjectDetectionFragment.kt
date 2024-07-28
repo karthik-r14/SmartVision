@@ -24,6 +24,7 @@ import android.widget.TextView
 import android.widget.Toast
 import android.widget.Toast.LENGTH_LONG
 import android.widget.Toast.LENGTH_SHORT
+import androidx.cardview.widget.CardView
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -82,6 +83,7 @@ class ObjectDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
 
     private var _binding: FragmentObjectDetectionBinding? = null
     private lateinit var camImageView: ImageView
+    private lateinit var cardView: CardView
     private lateinit var camTextView: TextView
     private lateinit var modeSelectionSpinner: Spinner
     private lateinit var errorLayout: LinearLayout
@@ -104,6 +106,7 @@ class ObjectDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
         _binding = FragmentObjectDetectionBinding.inflate(inflater, container, false)
         val root: View = binding.root
         camImageView = binding.camImageView
+        cardView = binding.cardView
         camTextView = binding.camDetectedLabel
         modeSelectionSpinner = binding.modeSelectionSpinner
         errorLayout = binding.errorLayout
@@ -259,12 +262,15 @@ class ObjectDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
                         camTextView.text = detectedLabelText
                     }
                     camImageView.setImageBitmap(bitmap)
+                    cardView.isVisible = true
                 }.addOnFailureListener { e ->
                     camImageView.setImageBitmap(bitmap)
+                    cardView.isVisible = true
                 }
 
             } catch (e: IOException) {
                 camImageView.setImageBitmap(bitmap)
+                cardView.isVisible = true
             }
         }
     }
@@ -316,17 +322,21 @@ class ObjectDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
                     }
                     bitmapDrawn = drawDetectionResult(bitmap, list)
                     camImageView.setImageBitmap(bitmapDrawn)
+                    cardView.isVisible = true
 
                     if (detectedObjects.isEmpty()) {
                         camImageView.setImageBitmap(bitmap)
+                        cardView.isVisible = true
                     } else {
                         camTextView.text = formattedText.toString()
                     }
                 }.addOnFailureListener { e ->
                     camImageView.setImageBitmap(bitmap)
+                    cardView.isVisible = true
                 }
             } catch (e: IOException) {
                 camImageView.setImageBitmap(bitmap)
+                cardView.isVisible = true
             }
         }
     }
@@ -354,6 +364,7 @@ class ObjectDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
                 }
                 withContext(Main) {
                     camImageView.setImageBitmap(resizedImageBitmap)
+                    cardView.isVisible = true
                     camTextView.text = answerText
                     announceTextToUserIfEnabled(textContent = answerText)
                 }
@@ -437,6 +448,7 @@ class ObjectDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
     private fun showConnectionErrorScreen() {
         errorLayout.isVisible = true
         camImageView.isVisible = false
+        cardView.isVisible = false
         detailItemLayout.isVisible = false
     }
 

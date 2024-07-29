@@ -141,6 +141,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
                     android:text="@string/prompt_text"
                     android:textColor="@color/black"
                     android:textSize="16sp"
@@ -152,9 +153,10 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/spacing2x"
                     android:background="@drawable/edit_text_border_normal"
+                    android:gravity="top"
                     android:hint="@string/prompt_hint_text"
                     android:inputType="textMultiLine"
-                    android:lines="2" />
+                    android:lines="3" />
             </LinearLayout>
 
         </LinearLayout>

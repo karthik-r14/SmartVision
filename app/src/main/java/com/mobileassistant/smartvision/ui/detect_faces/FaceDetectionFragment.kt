@@ -20,6 +20,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.cardview.widget.CardView
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -74,6 +75,7 @@ class FaceDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
 
     private var _binding: FragmentFaceDetectionBinding? = null
     private lateinit var camImageView: ImageView
+    private lateinit var cardView: CardView
     private lateinit var camTextView: TextView
     private lateinit var errorLayout: LinearLayout
     private lateinit var detailFacesLayout: LinearLayout
@@ -96,6 +98,7 @@ class FaceDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
         _binding = FragmentFaceDetectionBinding.inflate(inflater, container, false)
         val root: View = binding.root
         camImageView = binding.camImageView
+        cardView = binding.cardView
         camTextView = binding.camDetectedLabel
         errorLayout = binding.errorLayout
         detailFacesLayout = binding.detectedFaceLayout
@@ -219,16 +222,19 @@ class FaceDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
                 faceDetector.process(image).addOnSuccessListener { faces ->
                     if (faces.isEmpty()) {
                         camImageView.setImageBitmap(bitmap)
+                        cardView.isVisible = true
                         camTextView.text = NO_FACE_DETECTED_TEXT
                     } else {
                         getInfoFromFaceDetected(bitmap, faces)
                     }
                 }.addOnFailureListener { e ->
                     camImageView.setImageBitmap(bitmap)
+                    cardView.isVisible = true
                 }
 
             } catch (e: IOException) {
                 camImageView.setImageBitmap(bitmap)
+                cardView.isVisible = true
             }
         }
     }
@@ -252,6 +258,7 @@ class FaceDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
             }
             val bitmapDrawn = drawDetectionResult(image, boxes)
             camImageView.setImageBitmap(bitmapDrawn)
+            cardView.isVisible = true
 
             context?.let {
                 val faceDetectedText = if (faces.size == ONE) {
@@ -363,6 +370,7 @@ class FaceDetectionFragment : Fragment(), TextToSpeech.OnInitListener {
     private fun showConnectionErrorScreen() {
         errorLayout.isVisible = true
         camImageView.isVisible = false
+        cardView.isVisible = false
         detailFacesLayout.isVisible = false
     }
 

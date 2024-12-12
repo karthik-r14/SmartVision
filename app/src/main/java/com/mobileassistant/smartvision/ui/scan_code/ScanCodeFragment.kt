@@ -3,6 +3,7 @@ package com.mobileassistant.smartvision.ui.scan_code
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.speech.tts.TextToSpeech
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -11,24 +12,30 @@ import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
+import com.mobileassistant.smartvision.R
 import com.mobileassistant.smartvision.databinding.FragmentScanCodeBinding
-import com.mobileassistant.smartvision.mlkit.barcodeScanner.BarcodeScannerProcessor
+import com.mobileassistant.smartvision.mlkit.barcodescanner.BarcodeScannerProcessor
 import com.mobileassistant.smartvision.mlkit.utils.CameraSource
 import com.mobileassistant.smartvision.mlkit.utils.CameraSourcePreview
 import com.mobileassistant.smartvision.mlkit.utils.GraphicOverlay
 import com.mobileassistant.smartvision.ui.reading_mode.ReadingModeFragment
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import java.io.IOException
+import java.util.Locale
 
-class ScanCodeFragment : Fragment() {
+private const val COLLECTION_PATH = "products"
+
+class ScanCodeFragment : Fragment(), TextToSpeech.OnInitListener {
 
     private var _binding: FragmentScanCodeBinding? = null
     private var cameraSource: CameraSource? = null
     private var preview: CameraSourcePreview? = null
     private var graphicOverlay: GraphicOverlay? = null
+    private var textToSpeech: TextToSpeech? = null
+    private lateinit var database: FirebaseFirestore
 
     private val binding get() = _binding!!
 
@@ -38,6 +45,8 @@ class ScanCodeFragment : Fragment() {
         _binding = FragmentScanCodeBinding.inflate(inflater, container, false)
         preview = binding.previewView
         graphicOverlay = binding.graphicOverlay
+        textToSpeech = TextToSpeech(context, this)
+        database = Firebase.firestore
 
         if (allPermissionsGranted()) {
             createCameraSource()
@@ -55,19 +64,55 @@ class ScanCodeFragment : Fragment() {
             cameraSource = CameraSource(activity, graphicOverlay)
         }
 
+        binding.productInfoButton.setOnClickListener {
+            onProductInfoButtonClicked()
+        }
+
         try {
             context?.let {
-                lifecycleScope.launch(Dispatchers.IO) {
-                    cameraSource!!.setMachineLearningFrameProcessor(
-                        BarcodeScannerProcessor(it)
-                    )
+                val barcodeScannerProcessor = BarcodeScannerProcessor(it)
+                barcodeScannerProcessor.isCodeScannedLiveData.observe(
+                    viewLifecycleOwner
+                ) { barcode ->
+                    barcode?.let {
+                        with(binding) {
+                            productInfoButton.isEnabled = true
+                            barcodeValue.text = barcode.displayValue
+                        }
+                    } ?: run {
+                        binding.productInfoButton.isEnabled = false
+                    }
                 }
+                cameraSource!!.setMachineLearningFrameProcessor(barcodeScannerProcessor)
             }
         } catch (e: Exception) {
             Log.e("ScanCodeFragment", "Can not create image processor:", e)
             Toast.makeText(
                 context, "Can not create image processor: " + e.message, Toast.LENGTH_LONG
             ).show()
+        }
+    }
+
+    private fun onProductInfoButtonClicked() {
+        val barcodeValue = binding.barcodeValue.text
+        val docRef = database.collection(COLLECTION_PATH).document(barcodeValue.toString())
+        docRef.get().addOnSuccessListener { documentSnapshot ->
+            if (documentSnapshot.exists()) {
+                val product = documentSnapshot.toObject(ProductInfo::class.java)
+                binding.productInfo.text = getString(
+                    R.string.product_info,
+                    product?.productName,
+                    product?.productType,
+                    product?.productCost
+                )
+                textToSpeech?.speak(binding.productInfo.text, TextToSpeech.QUEUE_ADD, null, "")
+            } else {
+                binding.productInfo.text = getString(R.string.product_not_found_msg)
+                textToSpeech?.speak(binding.productInfo.text, TextToSpeech.QUEUE_ADD, null, "")
+            }
+        }.addOnFailureListener { exception ->
+            binding.productInfo.text = getString(R.string.product_not_found_msg)
+            textToSpeech?.speak(binding.productInfo.text, TextToSpeech.QUEUE_ADD, null, "")
         }
     }
 
@@ -164,5 +209,19 @@ class ScanCodeFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+        textToSpeech?.let {
+            it.stop()
+            it.shutdown()
+        }
+    }
+
+    override fun onInit(status: Int) {
+        if (status == TextToSpeech.SUCCESS) {
+            val result = textToSpeech!!.setLanguage(Locale.US)
+
+            if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
+                Log.e("TTS", "The Language not supported!")
+            }
+        }
     }
 }

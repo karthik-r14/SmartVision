@@ -2,6 +2,7 @@ plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
+    id 'com.google.gms.google-services'
 }
 
 apply plugin: 'kotlin-kapt'
@@ -83,6 +84,7 @@ dependencies {
     // Room
     implementation 'androidx.room:room-runtime:2.5.2'
     implementation 'androidx.cardview:cardview:1.0.0'
+    implementation 'com.google.firebase:firebase-firestore-ktx:24.4.1'
     kapt 'androidx.room:room-compiler:2.5.2'
     implementation 'androidx.room:room-ktx:2.5.2'
     // Coroutines

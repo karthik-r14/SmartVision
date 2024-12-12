@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-package com.mobileassistant.smartvision.mlkit.barcodeScanner
+package com.mobileassistant.smartvision.mlkit.barcodescanner
 
 import android.content.Context
 import android.util.Log
+import androidx.lifecycle.MutableLiveData
 import com.google.android.gms.tasks.Task
 import com.google.mlkit.vision.barcode.BarcodeScanner
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
-import com.mobileassistant.smartvision.mlkit.barcodescanner.BarcodeGraphic
 import com.mobileassistant.smartvision.mlkit.utils.GraphicOverlay
 import com.mobileassistant.smartvision.mlkit.utils.VisionProcessorBase
 
@@ -36,6 +36,7 @@ class BarcodeScannerProcessor(context: Context) : VisionProcessorBase<List<Barco
     //     .setBarcodeFormats(Barcode.FORMAT_QR_CODE)
     //     .build();
     private val barcodeScanner: BarcodeScanner = BarcodeScanning.getClient()
+    val isCodeScannedLiveData: MutableLiveData<Barcode?> = MutableLiveData(null)
 
     override fun stop() {
         super.stop()
@@ -49,9 +50,11 @@ class BarcodeScannerProcessor(context: Context) : VisionProcessorBase<List<Barco
     override fun onSuccess(barcodes: List<Barcode>, graphicOverlay: GraphicOverlay) {
         if (barcodes.isEmpty()) {
             Log.v(MANUAL_TESTING_LOG, "No barcode has been detected")
+            isCodeScannedLiveData.value = null
         }
         for (i in barcodes.indices) {
             val barcode = barcodes[i]
+            isCodeScannedLiveData.value = barcode
             graphicOverlay.add(BarcodeGraphic(graphicOverlay, barcode))
             logExtrasForTesting(barcode)
         }

@@ -41,8 +41,46 @@
         android:text="@string/scan_product_note"
         android:textColor="@color/black"
         android:textStyle="bold"
+        android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/guideline_one" />
 
+    <TextView
+        android:id="@+id/barcode_value"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/wait_for_barcode_msg"
+        android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/guideline_one" />
+
+    <Button
+        android:id="@+id/product_info_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginVertical="@dimen/spacing1x"
+        android:enabled="false"
+        android:text="@string/get_product_info"
+        android:textAllCaps="true"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/barcode_value" />
+
+    <TextView
+        android:id="@+id/product_info"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginVertical="@dimen/spacing1x"
+        android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textAllCaps="true"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/product_info_button" />
 </androidx.constraintlayout.widget.ConstraintLayout>

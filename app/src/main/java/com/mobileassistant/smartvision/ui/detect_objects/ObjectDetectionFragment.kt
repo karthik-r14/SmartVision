@@ -76,7 +76,7 @@ const val PROCESSING_DELAY_IN_MILLI_SECONDS = 1000L
 const val TIMEOUT_VALUE_IN_MILLISECONDS = 5000
 const val TEXT_TO_BE_TRIMMED = "http:// /jpg"
 
-private const val GEMINI_MODEL_FLASH = "gemini-1.5-flash"
+private const val GEMINI_MODEL_FLASH = "gemini-2.0-flash-exp"
 const val GEMINI_AI_API_KEY = BuildConfig.apiKey
 
 class ObjectDetectionFragment : Fragment(), TextToSpeech.OnInitListener {

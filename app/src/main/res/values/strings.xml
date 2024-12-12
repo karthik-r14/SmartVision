@@ -77,6 +77,10 @@
     <string name="steps_to_follow_text">Follow the steps given below to summarize your pdf document.</string>
     <string name="summarize_another_document">Summarize Another Document</string>
     <string name="scan_product_note">Note : This feature is coming soon.(At the moment you can only get value of Barcodes/QR-codes but not its corresponding product details.</string>
+    <string name="wait_for_barcode_msg">Wait for Barcode Value appear here</string>
+    <string name="get_product_info">Get Product info</string>
+    <string name="product_info">Product Info is given below\n Product Name : %1$s\n Product Type : %2$s\n Product Cost : %3$s</string>
+    <string name="product_not_found_msg">Unable to find product in our database.</string>
     <string-array name="feature_description">
         <item>1. Reading mode - Use this option to recognize text by placing the phone\'s camera over a sheet containing text.</item>
         <item>2. Summarize Docs - Use this feature to summarize pdf documents.</item>
